@@ -1,0 +1,477 @@
+{
+ "source_sha256": "858551b4293ee1abce4d3aaeac3dea07d817cfd80e111dd52dcff5b06d9fb732",
+ "comparaison_modeles": {
+  "Référence (taux moyen)": {
+   "ROC-AUC": 0.5,
+   "PR-AUC": 0.3686,
+   "Precision": 0.0,
+   "Recall": 0.0,
+   "F1": 0.0,
+   "Accuracy": 0.6314,
+   "Brier": 0.2327,
+   "Seuil": 0.5
+  },
+  "Régression logistique": {
+   "ROC-AUC": 0.6859,
+   "PR-AUC": 0.5375,
+   "Precision": 0.5177,
+   "Recall": 0.6755,
+   "F1": 0.5862,
+   "Accuracy": 0.6485,
+   "Brier": 0.2093,
+   "Seuil": 0.3388
+  },
+  "Random Forest": {
+   "ROC-AUC": 0.748,
+   "PR-AUC": 0.607,
+   "Precision": 0.5148,
+   "Recall": 0.8132,
+   "F1": 0.6305,
+   "Accuracy": 0.6486,
+   "Brier": 0.1926,
+   "Seuil": 0.2989
+  },
+  "XGBoost": {
+   "ROC-AUC": 0.7507,
+   "PR-AUC": 0.6112,
+   "Precision": 0.5182,
+   "Recall": 0.8068,
+   "F1": 0.6311,
+   "Accuracy": 0.6524,
+   "Brier": 0.1916,
+   "Seuil": 0.2982
+  },
+  "XGBoost optimisé (retenu)": {
+   "ROC-AUC": 0.7508,
+   "PR-AUC": 0.6113,
+   "Precision": 0.5264,
+   "Recall": 0.7901,
+   "F1": 0.6318,
+   "Accuracy": 0.6607,
+   "Brier": 0.1915,
+   "Seuil": 0.3182
+  }
+ },
+ "matrices_confusion": {
+  "Référence (taux moyen)": {
+   "VP": 0,
+   "FP": 0,
+   "FN": 17638,
+   "VN": 30218
+  },
+  "Régression logistique": {
+   "VP": 11914,
+   "FP": 11098,
+   "FN": 5724,
+   "VN": 19120
+  },
+  "Random Forest": {
+   "VP": 14344,
+   "FP": 13521,
+   "FN": 3294,
+   "VN": 16697
+  },
+  "XGBoost": {
+   "VP": 14230,
+   "FP": 13228,
+   "FN": 3408,
+   "VN": 16990
+  },
+  "XGBoost optimisé (retenu)": {
+   "VP": 13935,
+   "FP": 12536,
+   "FN": 3703,
+   "VN": 17682
+  }
+ },
+ "hyperparametres": {
+  "subsample": 0.9,
+  "reg_lambda": 1,
+  "n_estimators": 300,
+  "min_child_weight": 1,
+  "max_depth": 7,
+  "learning_rate": 0.05,
+  "colsample_bytree": 0.8
+ },
+ "stabilite_roc_auc": {
+  "Entraînement": 0.7679,
+  "Validation": 0.7518,
+  "Test": 0.7508
+ },
+ "sensibilite": {
+  "Modèle retenu (12 variables)": {
+   "Colonnes": 31.0,
+   "ROC-AUC": 0.7508,
+   "PR-AUC": 0.6113,
+   "Écart de ROC-AUC": 0.0
+  },
+  "+ secteur d'activité et groupe d'agences (14 variables)": {
+   "Colonnes": 65.0,
+   "ROC-AUC": 0.7564,
+   "PR-AUC": 0.6255,
+   "Écart de ROC-AUC": 0.0055
+  },
+  "Sans les deux variables de revue": {
+   "Colonnes": 29.0,
+   "ROC-AUC": 0.7302,
+   "PR-AUC": 0.5934,
+   "Écart de ROC-AUC": -0.0207
+  },
+  "Sans la famille Conformité": {
+   "Colonnes": 22.0,
+   "ROC-AUC": 0.6603,
+   "PR-AUC": 0.5054,
+   "Écart de ROC-AUC": -0.0905
+  },
+  "Conformité seule": {
+   "Colonnes": 9.0,
+   "ROC-AUC": 0.7156,
+   "PR-AUC": 0.5727,
+   "Écart de ROC-AUC": -0.0352
+  },
+  "Relation seule": {
+   "Colonnes": 11.0,
+   "ROC-AUC": 0.628,
+   "PR-AUC": 0.4702,
+   "Écart de ROC-AUC": -0.1228
+  },
+  "Démographie seule": {
+   "Colonnes": 11.0,
+   "ROC-AUC": 0.5812,
+   "PR-AUC": 0.4263,
+   "Écart de ROC-AUC": -0.1696
+  }
+ },
+ "demonstration_fuite": {
+  "Modèle AVEC variables de fuite": 0.9511,
+  "Modèle SANS variable de fuite (retenu)": 0.7507
+ },
+ "audit_fuite": [
+  {
+   "Variable": "ACCT_CLOSE_DATE",
+   "% vide si actif": 100.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 1.0,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "CLOSURE_REASON",
+   "% vide si actif": 100.0,
+   "% vide si clos": 9.1,
+   "AUC du vide": 0.954,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "CURRENCY",
+   "% vide si actif": 0.0,
+   "% vide si clos": 67.8,
+   "AUC du vide": 0.839,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "ACCOUNT_CATEGORY",
+   "% vide si actif": 0.0,
+   "% vide si clos": 67.8,
+   "AUC du vide": 0.839,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "ACCT_OPENING_DATE",
+   "% vide si actif": 0.0,
+   "% vide si clos": 67.8,
+   "AUC du vide": 0.839,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "ACCOUNT_TYPE_DESC",
+   "% vide si actif": 0.0,
+   "% vide si clos": 67.8,
+   "AUC du vide": 0.839,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "ACCT_BALANCE",
+   "% vide si actif": 0.0,
+   "% vide si clos": 67.8,
+   "AUC du vide": 0.839,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "AMOUNT",
+   "% vide si actif": 15.0,
+   "% vide si clos": 77.7,
+   "AUC du vide": 0.813,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "PRODUCT_LINE",
+   "% vide si actif": 14.7,
+   "% vide si clos": 76.0,
+   "AUC du vide": 0.806,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "PRODUCT_GROUP",
+   "% vide si actif": 14.7,
+   "% vide si clos": 76.0,
+   "AUC du vide": 0.806,
+   "Verdict": "FUITE — exclue"
+  },
+  {
+   "Variable": "COMPLETED_FILE",
+   "% vide si actif": 41.0,
+   "% vide si clos": 62.5,
+   "AUC du vide": 0.608,
+   "Verdict": "À surveiller"
+  },
+  {
+   "Variable": "FIXEDRATE",
+   "% vide si actif": 89.1,
+   "% vide si clos": 91.9,
+   "AUC du vide": 0.514,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "BIRTH_PERIOD",
+   "% vide si actif": 12.6,
+   "% vide si clos": 10.6,
+   "AUC du vide": 0.51,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "MARITAL_STATUS",
+   "% vide si actif": 12.1,
+   "% vide si clos": 10.3,
+   "AUC du vide": 0.509,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "SALARY",
+   "% vide si actif": 68.2,
+   "% vide si clos": 69.8,
+   "AUC du vide": 0.508,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "MATURITYDATE",
+   "% vide si actif": 92.0,
+   "% vide si clos": 93.4,
+   "AUC du vide": 0.507,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "STARTDATE",
+   "% vide si actif": 89.1,
+   "% vide si clos": 90.4,
+   "AUC du vide": 0.507,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "PRODUCT_STATUS",
+   "% vide si actif": 89.1,
+   "% vide si clos": 90.4,
+   "AUC du vide": 0.507,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "CUST_OPENING_DATE",
+   "% vide si actif": 0.6,
+   "% vide si clos": 0.7,
+   "AUC du vide": 0.501,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "NATIONALITY_REGION",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "RESIDENCE_REGION",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "LAST_REVIEW_DATE",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "NEXT__REVIEW_DATE",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "BRANCH_GROUP",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "SCORE_KYC",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "NATURE_CLIENT",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "INDUSTRY",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "PARTYCLASS",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  },
+  {
+   "Variable": "LOB",
+   "% vide si actif": 0.0,
+   "% vide si clos": 0.0,
+   "AUC du vide": 0.5,
+   "Verdict": "Saine"
+  }
+ ],
+ "importance": [
+  {
+   "Variable": "Mois avant la prochaine revue",
+   "Gain (part)": 0.2002,
+   "SHAP moyen absolu": 0.483599990606308,
+   "SHAP (part)": 0.3416999876499176
+  },
+  {
+   "Variable": "Mois depuis la dernière revue",
+   "Gain (part)": 0.3997,
+   "SHAP moyen absolu": 0.26159998774528503,
+   "SHAP (part)": 0.18490000069141388
+  },
+  {
+   "Variable": "Ancienneté client (années)",
+   "Gain (part)": 0.1004,
+   "SHAP moyen absolu": 0.1670999974012375,
+   "SHAP (part)": 0.11810000240802765
+  },
+  {
+   "Variable": "Âge",
+   "Gain (part)": 0.1153,
+   "SHAP moyen absolu": 0.15539999306201935,
+   "SHAP (part)": 0.10980000346899033
+  },
+  {
+   "Variable": "Nombre de comptes",
+   "Gain (part)": 0.0716,
+   "SHAP moyen absolu": 0.07739999890327454,
+   "SHAP (part)": 0.05469999834895134
+  },
+  {
+   "Variable": "Score KYC",
+   "Gain (part)": 0.0316,
+   "SHAP moyen absolu": 0.06859999895095825,
+   "SHAP (part)": 0.048500001430511475
+  },
+  {
+   "Variable": "Dossier complet",
+   "Gain (part)": 0.0042,
+   "SHAP moyen absolu": 0.06080000102519989,
+   "SHAP (part)": 0.042899999767541885
+  },
+  {
+   "Variable": "Revenu déclaré",
+   "Gain (part)": 0.0208,
+   "SHAP moyen absolu": 0.042899999767541885,
+   "SHAP (part)": 0.030300000682473183
+  },
+  {
+   "Variable": "Statut marital",
+   "Gain (part)": 0.0184,
+   "SHAP moyen absolu": 0.036400001496076584,
+   "SHAP (part)": 0.025699999183416367
+  },
+  {
+   "Variable": "Segment commercial",
+   "Gain (part)": 0.0126,
+   "SHAP moyen absolu": 0.022299999371170998,
+   "SHAP (part)": 0.015699999406933784
+  },
+  {
+   "Variable": "Nature du client",
+   "Gain (part)": 0.0096,
+   "SHAP moyen absolu": 0.021800000220537186,
+   "SHAP (part)": 0.015399999916553497
+  },
+  {
+   "Variable": "Zone de résidence",
+   "Gain (part)": 0.0156,
+   "SHAP moyen absolu": 0.01759999990463257,
+   "SHAP (part)": 0.012400000356137753
+  }
+ ],
+ "gains": [
+  {
+   "Clients ciblés": 0.05,
+   "Départs captés": 0.1002,
+   "Taux de churn dans la cible": 0.7388,
+   "Lift": 2.0046
+  },
+  {
+   "Clients ciblés": 0.1,
+   "Départs captés": 0.1902,
+   "Taux de churn dans la cible": 0.701,
+   "Lift": 1.902
+  },
+  {
+   "Clients ciblés": 0.2,
+   "Départs captés": 0.3543,
+   "Taux de churn dans la cible": 0.6529,
+   "Lift": 1.7715
+  },
+  {
+   "Clients ciblés": 0.3,
+   "Départs captés": 0.5005,
+   "Taux de churn dans la cible": 0.6149,
+   "Lift": 1.6683
+  },
+  {
+   "Clients ciblés": 0.5,
+   "Départs captés": 0.7437,
+   "Taux de churn dans la cible": 0.5482,
+   "Lift": 1.4874
+  }
+ ],
+ "niveaux_de_risque": [
+  {
+   "niveau": "Faible (< 25 %)",
+   "clients_test": 17707,
+   "taux_observe": 0.15
+  },
+  {
+   "niveau": "Modéré (25–50 %)",
+   "clients_test": 14647,
+   "taux_observe": 0.3788
+  },
+  {
+   "niveau": "Élevé (≥ 50 %)",
+   "clients_test": 15502,
+   "taux_observe": 0.6085
+  }
+ ]
+}
