@@ -1,122 +1,121 @@
 # 02 — Data Warehouse
 
-Entrepôt **PostgreSQL** du projet VIGIE (Groupe BI 5), modélisé **en étoile** et administré avec **pgAdmin**.
+**PostgreSQL** warehouse of the VIGIE project (Group BI 5), modelled as a **star schema** and administered with **pgAdmin**.
 
-| Fichier | Rôle |
+| File | Role |
 |---|---|
-| [`schema/create_tables.sql`](schema/create_tables.sql) | Création des schémas `staging` et `dwh`, des 8 dimensions, de la table de faits, du calendrier et des vues |
-| [`schema/star_schema.png`](schema/star_schema.png) | Diagramme du modèle en étoile |
-| [`controles/controles.sql`](controles/controles.sql) | 19 contrôles source ↔ entrepôt, avec verdict OK / KO |
-| [`controles/resultats_controles.md`](controles/resultats_controles.md) | Résultat de la dernière exécution (19 / 19 OK) |
-| [`kpis.md`](kpis.md) | Catalogue des 20 KPI : grain, formule, valeur de référence |
-| [`scd2/dim_client_scd2.sql`](scd2/dim_client_scd2.sql) | *Bonus* — historisation SCD de type 2 de la dimension client |
+| [`schema/create_tables.sql`](schema/create_tables.sql) | Creates the `staging` and `dwh` schemas, the 8 dimensions, the fact table, the calendar and the views |
+| [`schema/star_schema.png`](schema/star_schema.png) | Star schema diagram |
+| [`checks/checks.sql`](checks/checks.sql) | 19 source ↔ warehouse checks, each with an OK / KO verdict |
+| [`checks/check_results.md`](checks/check_results.md) | Result of the last run (19 / 19 OK), written by `checks/check_report.py` |
+| [`kpis.md`](kpis.md) | Catalogue of the 20 KPIs: grain, formula, reference value |
+| [`scd2/dim_customer_scd2.sql`](scd2/dim_customer_scd2.sql) | *Bonus* — type 2 slowly changing customer dimension |
 
-## Le modèle en étoile
+## The star schema
 
-![Modèle en étoile](schema/star_schema.png)
+![Star schema](schema/star_schema.png)
 
 ```mermaid
 erDiagram
-    dim_client           ||--o{ fait_compte : "détient"
-    dim_agence           ||--o{ fait_compte : "gère"
-    dim_secteur          ||--o{ fait_compte : "secteur du client"
-    dim_categorie_compte ||--o{ fait_compte : "famille"
-    dim_devise           ||--o{ fait_compte : "devise"
-    dim_motif_cloture    ||--o{ fait_compte : "motif"
-    dim_produit          ||--o{ fait_compte : "produit"
-    dim_date             ||--o{ fait_compte : "ouverture / clôture"
-    fait_compte {
-        int compte_id PK
-        varchar code_compte
-        int client_id FK
-        int date_ouverture_id FK
-        int date_cloture_id FK
-        smallint est_clos "cible : 1 = churn"
-        numeric solde
-        numeric montant_produit
-        int anciennete_compte_jours
+    dim_customer         ||--o{ fact_account : "holds"
+    dim_branch           ||--o{ fact_account : "manages"
+    dim_industry         ||--o{ fact_account : "customer's industry"
+    dim_account_category ||--o{ fact_account : "family"
+    dim_currency         ||--o{ fact_account : "currency"
+    dim_closure_reason   ||--o{ fact_account : "reason"
+    dim_product          ||--o{ fact_account : "product"
+    dim_date             ||--o{ fact_account : "opening / closing"
+    fact_account {
+        int account_id PK
+        varchar account_code
+        int customer_id FK
+        int opening_date_id FK
+        int closing_date_id FK
+        smallint is_closed "target: 1 = churn"
+        numeric balance
+        numeric product_amount
+        int account_age_days
     }
-    dim_client {
-        int client_id PK
-        varchar code_client
+    dim_customer {
+        int customer_id PK
+        varchar customer_code
         varchar segment
-        varchar tranche_age
-        varchar score_kyc
-        boolean dossier_complet
-        smallint nb_comptes
-        smallint est_churn
+        varchar age_band
+        varchar kyc_score
+        boolean file_complete
+        smallint n_accounts
+        smallint is_churned
     }
     dim_date {
-        int date_id PK "AAAAMMJJ"
-        date date_complete
-        date lundi_semaine
+        int date_id PK "YYYYMMDD"
+        date full_date
+        date week_start
     }
 ```
 
-## Les choix de conception, et pourquoi
+## Design choices, and why
 
-### 1. Le grain : un compte
+### 1. The grain: one account
 
-Le fichier source mélange trois grains (ligne, compte, client). **Une ligne de `fait_compte` = un compte.**
+The source file mixes three grains (row, account, customer). **One row of `fact_account` = one account.**
 
-* C'est le grain de la **cible** : le churn est défini par la clôture d'un *compte*.
-* C'est le grain le plus fin qui soit **stable** : tous les attributs d'un compte sont constants d'une ligne à
-  l'autre du fichier, sauf la date de clôture.
-* Il se **ré-agrège** sans risque vers le client, l'agence ou la semaine. L'inverse serait impossible.
+* It is the grain of the **target**: churn is defined by the closure of an *account*.
+* It is the finest grain that is **stable**: every attribute of an account is constant from one row of the file
+  to the next, except the closing date.
+* It can be **re-aggregated** safely to the customer, the branch or the week. The reverse would be impossible.
 
-Quand un compte porte plusieurs dates de clôture (11 807 comptes), on retient **la première** : c'est l'événement de
-churn. Le nombre de lignes fusionnées est conservé dans `nb_lignes_source` pour le contrôle (C04).
+When an account carries several closing dates (11,807 accounts), **the first one** is kept: it is the churn event.
+The number of merged rows is kept in `n_source_rows` for reconciliation (check C04).
 
-### 2. Les clients sans compte restent dans la dimension
+### 2. Customers with no account stay in the dimension
 
-43 984 clients n'ont aucun compte. Ils sont chargés dans `dim_client` avec `nb_comptes = 0` et `est_churn = NULL`,
-mais ne génèrent aucun fait. On peut ainsi compter *tous* les clients (K04) sans fausser les taux de churn.
+43,984 customers hold no account. They are loaded into `dim_customer` with `n_accounts = 0` and
+`is_churned = NULL`, but generate no fact. *All* customers can thus be counted (K04) without distorting churn rates.
 
-### 3. Le membre « Non renseigné » (clé 0)
+### 3. The "Not provided" member (key 0)
 
-Chaque dimension contient une ligne de clé `0`. Une valeur vide dans la source pointe vers elle : **aucune clé
-étrangère n'est nulle**, aucune jointure ne perd de lignes, et Power BI affiche « Non renseigné » plutôt qu'un vide.
-C'est essentiel ici, car un quart des comptes n'a ni famille, ni devise, ni date d'ouverture.
+Every dimension holds a row with key `0`. A blank value in the source points to it: **no foreign key is null**, no
+join loses rows, and Power BI shows "Not provided" rather than a blank. This matters here, because a quarter of the
+accounts have no family, no currency and no opening date.
 
-### 4. Un calendrier construit, qui joue deux rôles
+### 4. A calendar built here, playing two roles
 
-`dim_date` est générée par `generate_series` (1978 → 2031). Elle est reliée deux fois à la table de faits :
-date d'ouverture et date de clôture (*role-playing dimension*). La colonne `lundi_semaine` donne directement le
-grain hebdomadaire de la série temporelle.
+`dim_date` is generated with `generate_series` (1978 → 2031). It is linked twice to the fact table: opening date
+and closing date (*role-playing dimension*). The `week_start` column gives the weekly grain of the time series directly.
 
-### 5. Les variables dérivées sont calculées une seule fois
+### 5. Derived variables are computed once
 
-Âge, tranche d'âge, ancienneté, mois depuis la dernière revue, revue en retard : ces variables sont calculées par
-l'ETL et stockées dans `dim_client`. Power BI, les modèles et l'application lisent ainsi **la même valeur**.
-La date de référence est le dernier événement de compte observé (19/02/2024 dans le jeu décalé).
+Age, age band, tenure, months since last review, review overdue: these variables are computed by the ETL and stored
+in `dim_customer`. Power BI, the models and the application therefore read **the same value**.
+The reference date is the last account event observed (19 Feb 2024 in the shifted dataset).
 
-### 6. Les anomalies sont signalées, pas maquillées
+### 6. Anomalies are flagged, not hidden
 
-20 166 comptes clos ont une date d'ouverture postérieure à leur date de clôture. L'entrepôt garde la valeur source,
-lève le drapeau `ouverture_apres_cloture` et ne calcule pas l'ancienneté de ces comptes (contrôles C15 et C19).
+20,166 closed accounts have an opening date later than their closing date. The warehouse keeps the source value,
+raises the `opened_after_closing` flag and does not compute the age of these accounts (checks C15 and C19).
 
-## Mise en place avec pgAdmin
+## Setting up with pgAdmin
 
-1. Dans pgAdmin : clic droit sur *Databases* → *Create* → *Database…* → nom **`vigie_dwh`**, encodage `UTF8`.
-2. Ouvrir le *Query Tool* sur `vigie_dwh`, charger `schema/create_tables.sql`, exécuter (F5).
-   Le script crée les schémas, les tables, le calendrier et les vues. Il est ré-exécutable.
-3. Alimenter l'entrepôt avec les jobs **Talend** (voir [`01_etl/talend/`](../01_etl/talend/README.md)) ou, pour
-   comparer, avec le pipeline Python : `python 01_etl/pipeline_python/etl.py`.
-4. Charger `controles/controles.sql` et exécuter : les 19 lignes doivent afficher **OK**.
+1. In pgAdmin: right-click *Databases* → *Create* → *Database…* → name **`vigie_dwh`**, encoding `UTF8`.
+2. Open the *Query Tool* on `vigie_dwh`, load `schema/create_tables.sql`, run it (F5).
+   The script creates the schemas, the tables, the calendar and the views. It can be re-run.
+3. Load the warehouse with the **Talend** jobs (see [`01_etl/talend/`](../01_etl/talend/README.md)) or, for
+   comparison, with the Python pipeline: `python 01_etl/python_pipeline/etl.py`.
+4. Load `checks/checks.sql` and run it: the 19 rows must show **OK**.
 
-## Vues prêtes à l'emploi
+## Ready-made views
 
-| Vue | Contenu | Utilisée par |
+| View | Content | Used by |
 |---|---|---|
-| `dwh.v_kpi_global` | Les KPI de volume et de churn, en une ligne | page d'accueil Power BI, contrôles |
-| `dwh.v_clotures_hebdo` | Clôtures par semaine, semaines à zéro incluses | série temporelle (phase 4) |
-| `dwh.v_churn_segment_client` | Taux de churn par segment, âge, ancienneté, KYC, dossier | segmentation |
-| `dwh.v_controles` | Les 19 contrôles et leurs valeurs | recette du chargement |
+| `dwh.v_kpi_overall` | Volume and churn KPIs, in one row | Power BI overview page, checks |
+| `dwh.v_weekly_closures` | Closures per week, zero weeks included | time series (phase 4) |
+| `dwh.v_churn_by_customer_segment` | Churn rate by segment, age, tenure, KYC, file | segmentation |
+| `dwh.v_checks` | The 19 checks and their values | acceptance of the load |
 
-## Bonus — SCD de type 2
+## Bonus — SCD type 2
 
-`scd2/dim_client_scd2.sql` historise les attributs du client susceptibles de changer (score KYC, segment, dossier
-complet) : chaque changement ferme la version courante et en ouvre une nouvelle (`date_debut_validite`,
-`date_fin_validite`, `est_version_courante`). Le script contient une démonstration sur quatre clients **fictifs**
-et une requête « état à une date donnée ». Le jeu fourni étant une photographie unique, il n'y a pas d'historique
-réel à charger : le mécanisme est prêt pour un second chargement.
+`scd2/dim_customer_scd2.sql` keeps the history of the customer attributes that are likely to change (KYC score,
+segment, complete file): each change closes the current version and opens a new one (`valid_from`, `valid_to`,
+`is_current`). The script includes a demonstration on four **fictitious** customers and an "as of a given date"
+query. Since the provided dataset is a single snapshot, there is no real history to load: the mechanism is ready
+for a second load.

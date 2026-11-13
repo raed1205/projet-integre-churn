@@ -1,50 +1,53 @@
-# 01 — Compréhension des données et ETL
+# 01 — Data understanding and ETL
 
-| Contenu | Fichier | Statut |
+| Content | File | Status |
 |---|---|---|
-| Analyse univariée, manquants, outliers | [`notebooks/01_analyse_univariee.ipynb`](notebooks/01_analyse_univariee.ipynb) | obligatoire |
-| Tableau de synthèse par variable | [`synthese_variables.md`](synthese_variables.md) | obligatoire |
-| Analyse bivariée | [`notebooks/02_analyse_bivariee.ipynb`](notebooks/02_analyse_bivariee.ipynb) | bonus |
-| Jobs Talend : spécification et exports | [`talend/`](talend/README.md) | obligatoire |
-| Schéma du flux | [`schema_flux.png`](schema_flux.png) | obligatoire |
-| Pipeline Python équivalent | [`pipeline_python/etl.py`](pipeline_python/etl.py) | bonus |
-| Collecte de contexte sectoriel | [`scraping/`](scraping/README.md) | bonus |
+| Univariate analysis, missing values, outliers | [`notebooks/01_univariate_analysis.ipynb`](notebooks/01_univariate_analysis.ipynb) | mandatory |
+| Summary table per variable | [`variable_summary.md`](variable_summary.md) | mandatory |
+| Bivariate analysis | [`notebooks/02_bivariate_analysis.ipynb`](notebooks/02_bivariate_analysis.ipynb) | bonus |
+| Talend jobs: specification and exports | [`talend/`](talend/README.md) | mandatory |
+| Flow diagram | [`etl_flow.png`](etl_flow.png) | mandatory |
+| Equivalent Python pipeline | [`python_pipeline/etl.py`](python_pipeline/etl.py) | bonus |
+| Collection of sector context | [`scraping/`](scraping/README.md) | bonus |
 
-## Le flux, de bout en bout
+## The flow, end to end
 
-![Flux ETL](schema_flux.png)
+![ETL flow](etl_flow.png)
 
-## Ce que la phase 1 a établi
+## What phase 1 established
 
-| Constat | Chiffre | Conséquence |
+| Finding | Figure | Consequence |
 |---|---|---|
-| Volumes conformes au document des tuteurs | 483 536 lignes · 363 024 clients · 410 309 comptes | fichier intègre |
-| Trois grains dans un seul fichier | ligne, compte, client | grain **compte** pour l'entrepôt, **client** pour le modèle |
-| Le taux de churn dépend du grain | 40,3 % / 36,1 % / 32,3 % | toujours préciser le grain d'un taux |
-| Aucun client à statut mixte | 0 client actif *et* clos | churn client sans ambiguïté |
-| Vides liés à la clôture | solde vide pour 67,8 % des comptes clos, 0 % des actifs | **fuite de cible** à neutraliser |
-| Soldes hors bornes IQR | 32,1 % | comptes débiteurs : interprétés, pas supprimés |
-| Dates incohérentes | 20 166 comptes clos « avant » leur ouverture | signalés dans l'entrepôt |
+| Volumes match the supervisors' document | 483,536 rows · 363,024 customers · 410,309 accounts | the file is intact |
+| Three grains in a single file | row, account, customer | **account** grain for the warehouse, **customer** grain for the model |
+| The churn rate depends on the grain | 40.3% / 36.1% / 32.3% | always state the grain of a rate |
+| No customer with a mixed status | 0 customer both active *and* closed | customer churn is unambiguous |
+| Blanks tied to the closure | balance blank for 67.8% of closed accounts, 0% of active ones | **target leak** to neutralise |
+| Balances outside the IQR bounds | 32.1% | accounts in debit: interpreted, not removed |
+| Inconsistent dates | 20,166 accounts closed "before" they were opened | flagged in the warehouse |
 
-## Règles de transformation (communes à Talend et à Python)
+## Transformation rules (shared by Talend and Python)
 
-| # | Règle | Détail |
+| # | Rule | Detail |
 |---|---|---|
-| R1 | Typage | dates `YYYYMMDD` → `date` ; montants → `numeric` ; vides conservés (`NULL`) |
-| R2 | Doublons exacts | 8 335 lignes strictement identiques, absorbées par le passage au grain compte |
-| R3 | Grain compte | une ligne par `ACCOUNT_NO` ; **première** date de clôture ; `nb_lignes_source` = lignes fusionnées |
-| R4 | Grain client | une ligne par `CUSTOMER_NO` ; `nb_comptes` ; `est_churn` = tous les comptes sont clos |
-| R5 | Référentiels | jointure des 5 fichiers Excel ; code absent → membre « Non renseigné » (clé 0) |
-| R6 | Recodages | `COMPLETED_FILE` → booléen ; statut marital → libellé ; vides → « Non renseigné » |
-| R7 | Variables dérivées | âge, tranche d'âge, ancienneté, tranche d'ancienneté, mois depuis la revue, revue en retard |
-| R8 | Anomalies | ouverture postérieure à la clôture → drapeau, ancienneté non calculée |
+| R1 | Typing | `YYYYMMDD` dates → `date`; amounts → `numeric`; blanks kept (`NULL`) |
+| R2 | Exact duplicates | 8,335 strictly identical rows, absorbed by the move to account grain |
+| R3 | Account grain | one row per `ACCOUNT_NO`; **first** closing date; `n_source_rows` = merged rows |
+| R4 | Customer grain | one row per `CUSTOMER_NO`; `n_accounts`; `is_churned` = all accounts are closed |
+| R5 | Reference files | join of the 5 Excel files; missing code → "Not provided" member (key 0) |
+| R6 | Recoding | `COMPLETED_FILE` → boolean; marital status → label; blanks → "Not provided" |
+| R7 | Derived variables | age, age band, tenure, tenure band, months since review, review overdue |
+| R8 | Anomalies | opening later than closing → flag, age not computed |
 
-## Exécuter les notebooks
+## Running the notebooks
 
 ```bash
 pip install -r requirements.txt
-# placer les fichiers fournis par les tuteurs dans data/ (ignoré par git)
+```
+
+```bash
 jupyter lab 01_etl/notebooks/
 ```
 
-Les notebooks n'affichent **aucune ligne client** : uniquement des comptages et des distributions.
+Put the files provided by the supervisors in `data/` first (git-ignored). The notebooks display **no customer
+row**: only counts and distributions.
