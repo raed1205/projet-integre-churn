@@ -1,11 +1,10 @@
-"""Du profil client au vecteur de variables du modèle.
+"""From a customer profile to the model's feature vector.
 
-Ce module est **le seul endroit** où un profil est transformé en variables.
-Il est utilisé à l'entraînement (04_machine_learning) *et* par l'application :
-il ne peut donc pas y avoir d'écart entre ce que le modèle a appris et ce
-qu'on lui présente en production.
+This module is **the only place** where a profile is turned into features. It is used
+for training (04_machine_learning) *and* by the application, so there can be no gap
+between what the model learnt and what it is shown in production.
 
-Il ne dépend que de pandas / numpy et ne lit aucune donnée.
+It depends only on pandas / numpy and reads no data.
 """
 
 from __future__ import annotations
@@ -13,112 +12,107 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-# Variables numériques : laissées telles quelles (une valeur manquante reste NaN).
-NUMERIQUES = [
-    "AGE",                         # âge en années (milieu de la tranche de naissance)
-    "ANCIENNETE_CLIENT",           # années depuis l'entrée en relation
-    "NB_COMPTES",                  # nombre de comptes détenus
-    "SALAIRE",                     # revenu déclaré (arrondi), NaN si non déclaré
-    "DOSSIER_COMPLET",             # 1 si le dossier client est complet
-    "MOIS_DEPUIS_REVUE",           # mois écoulés depuis la dernière revue du dossier
-    "MOIS_AVANT_PROCHAINE_REVUE",  # mois avant la prochaine revue (négatif = revue en retard)
+# Numeric features: passed through as they are (a missing value stays NaN).
+NUMERIC = [
+    "AGE",                    # age in years (middle of the birth period)
+    "CUSTOMER_TENURE",        # years since the relationship started
+    "N_ACCOUNTS",             # number of accounts held
+    "SALARY",                 # declared income (rounded), NaN when not declared
+    "FILE_COMPLETE",          # 1 when the customer file is complete
+    "MONTHS_SINCE_REVIEW",    # months elapsed since the last file review
+    "MONTHS_TO_NEXT_REVIEW",  # months until the next review (negative = review overdue)
 ]
 
-# Variables catégorielles et leurs modalités autorisées (ordre figé = colonnes figées).
-# Toute modalité absente de la liste est rangée dans la dernière de sa liste.
-# SEGMENT et les codes KYC n'ont pas de modalité "autre" : une valeur inconnue y est
-# donc rangée, par convention, dans la dernière modalité listée.
-CATEGORIELLES = {
-    "STATUT_MARITAL": ["C", "M", "D", "V", "NR"],
-    "NATURE_CLIENT": ["PPH", "PM", "PRO", "AUTRE"],
+# Categorical features and their allowed categories (fixed order = fixed columns).
+# Any value that is not in the list falls into the last category of that list.
+CATEGORICAL = {
+    "MARITAL_STATUS": ["C", "M", "D", "V", "NR"],
+    "CUSTOMER_TYPE": ["PPH", "PM", "PRO", "OTHER"],
     "SEGMENT": ["Retail", "Premium", "Corporate Small", "Corporate"],
-    "SCORE_KYC": ["LR", "MR", "H1", "H2", "H3", "NR"],
-    "ZONE_RESIDENCE": ["LOCAL", "EUROPE", "AFRIQUE_MO", "AMERIQUES", "AUTRE"],
+    "KYC_SCORE": ["LR", "MR", "H1", "H2", "H3", "NR"],
+    "RESIDENCE_ZONE": ["LOCAL", "EUROPE", "AFRIQUE_MO", "AMERIQUES", "OTHER"],
 }
 
-LIBELLES = {
-    "AGE": "Âge",
-    "ANCIENNETE_CLIENT": "Ancienneté client (années)",
-    "NB_COMPTES": "Nombre de comptes",
-    "SALAIRE": "Revenu déclaré",
-    "DOSSIER_COMPLET": "Dossier complet",
-    "MOIS_DEPUIS_REVUE": "Mois depuis la dernière revue",
-    "MOIS_AVANT_PROCHAINE_REVUE": "Mois avant la prochaine revue",
-    "STATUT_MARITAL": "Statut marital",
-    "NATURE_CLIENT": "Nature du client",
-    "SEGMENT": "Segment commercial",
-    "SCORE_KYC": "Score KYC",
-    "ZONE_RESIDENCE": "Zone de résidence",
+LABELS = {
+    "AGE": "Age",
+    "CUSTOMER_TENURE": "Customer tenure (years)",
+    "N_ACCOUNTS": "Number of accounts",
+    "SALARY": "Declared income",
+    "FILE_COMPLETE": "Complete file",
+    "MONTHS_SINCE_REVIEW": "Months since last review",
+    "MONTHS_TO_NEXT_REVIEW": "Months to next review",
+    "MARITAL_STATUS": "Marital status",
+    "CUSTOMER_TYPE": "Customer type",
+    "SEGMENT": "Commercial segment",
+    "KYC_SCORE": "KYC score",
+    "RESIDENCE_ZONE": "Residence zone",
 }
 
-LIBELLES_MODALITES = {
-    "STATUT_MARITAL": {"C": "Célibataire", "M": "Marié(e)", "D": "Divorcé(e)", "V": "Veuf / veuve",
-                       "NR": "Non renseigné"},
-    "NATURE_CLIENT": {"PPH": "Personne physique", "PM": "Personne morale", "PRO": "Professionnel",
-                      "AUTRE": "Autre catégorie"},
-    "SCORE_KYC": {"LR": "LR — risque faible", "MR": "MR — risque moyen", "H1": "H1 — risque élevé (1)",
-                  "H2": "H2 — risque élevé (2)", "H3": "H3 — risque élevé (3)", "NR": "Non renseigné"},
-    "ZONE_RESIDENCE": {"LOCAL": "Locale", "EUROPE": "Europe", "AFRIQUE_MO": "Afrique / Moyen-Orient",
-                       "AMERIQUES": "Amériques", "AUTRE": "Autre zone"},
+CATEGORY_LABELS = {
+    "MARITAL_STATUS": {"C": "Single", "M": "Married", "D": "Divorced", "V": "Widowed", "NR": "Not provided"},
+    "CUSTOMER_TYPE": {"PPH": "Individual", "PM": "Legal entity", "PRO": "Professional", "OTHER": "Other category"},
+    "KYC_SCORE": {"LR": "LR — low risk", "MR": "MR — medium risk", "H1": "H1 — high risk (1)",
+                  "H2": "H2 — high risk (2)", "H3": "H3 — high risk (3)", "NR": "Not provided"},
+    "RESIDENCE_ZONE": {"LOCAL": "Local", "EUROPE": "Europe", "AFRIQUE_MO": "Africa / Middle East",
+                       "AMERIQUES": "Americas", "OTHER": "Other zone"},
 }
 
-
-# Règle métier constatée dans les données : la durée du cycle de revue dépend du score KYC
-# (98 à 99 % des clients de chaque score). La prochaine revue se déduit donc de la dernière.
-CYCLE_REVUE_MOIS = {"LR": 48, "MR": 36, "H1": 24, "H2": 24, "H3": 24, "NR": 48}
-
-
-def mois_avant_prochaine_revue(score_kyc: str, mois_depuis_revue: float) -> float:
-    """Mois restants avant la prochaine revue (négatif = revue en retard)."""
-    return CYCLE_REVUE_MOIS.get(score_kyc, 48) - mois_depuis_revue
+# Business rule found in the data: the length of the review cycle depends on the KYC score
+# (97 to 99% of the customers of each score). The next review therefore follows from the last one.
+REVIEW_CYCLE_MONTHS = {"LR": 48, "MR": 36, "H1": 24, "H2": 24, "H3": 24, "NR": 48}
 
 
-def colonnes_modele() -> list[str]:
-    """Liste ordonnée des colonnes attendues par le modèle."""
-    cols = list(NUMERIQUES)
-    for variable, modalites in CATEGORIELLES.items():
-        cols += [f"{variable}={m}" for m in modalites]
+def months_to_next_review(kyc_score: str, months_since_review: float) -> float:
+    """Months left before the next review (negative = review overdue)."""
+    return REVIEW_CYCLE_MONTHS.get(kyc_score, 48) - months_since_review
+
+
+def model_columns() -> list[str]:
+    """Ordered list of the columns the model expects."""
+    cols = list(NUMERIC)
+    for feature, categories in CATEGORICAL.items():
+        cols += [f"{feature}={c}" for c in categories]
     return cols
 
 
-def variable_d_origine(colonne: str) -> str:
-    """Retrouve la variable métier derrière une colonne encodée (``SEGMENT=Retail`` -> ``SEGMENT``)."""
-    return colonne.split("=", 1)[0]
+def source_feature(column: str) -> str:
+    """Business feature behind an encoded column (``SEGMENT=Retail`` -> ``SEGMENT``)."""
+    return column.split("=", 1)[0]
 
 
-def normaliser_modalites(profils: pd.DataFrame) -> pd.DataFrame:
-    """Range chaque valeur catégorielle dans une modalité connue."""
-    out = profils.copy()
-    for variable, modalites in CATEGORIELLES.items():
-        defaut = modalites[-1]
-        valeurs = out[variable].astype("object").where(out[variable].notna(), None)
-        out[variable] = [v if v in modalites else defaut for v in valeurs]
+def normalise_categories(profiles: pd.DataFrame) -> pd.DataFrame:
+    """Put every categorical value into a known category."""
+    out = profiles.copy()
+    for feature, categories in CATEGORICAL.items():
+        fallback = categories[-1]
+        values = out[feature].astype("object").where(out[feature].notna(), None)
+        out[feature] = [v if v in categories else fallback for v in values]
     return out
 
 
-def encoder(profils: pd.DataFrame) -> pd.DataFrame:
-    """Transforme des profils (une ligne = un client) en matrice du modèle.
+def encode(profiles: pd.DataFrame) -> pd.DataFrame:
+    """Turn profiles (one row = one customer) into the model matrix.
 
-    * numériques : converties en ``float`` (NaN conservé, géré par le modèle) ;
-    * catégorielles : encodage « one-hot » sur une liste figée de modalités.
+    * numeric features: cast to ``float`` (NaN is kept; the model handles it);
+    * categorical features: one-hot encoding over a fixed list of categories.
     """
-    manquantes = [c for c in list(NUMERIQUES) + list(CATEGORIELLES) if c not in profils.columns]
-    if manquantes:
-        raise ValueError(f"Variables absentes du profil : {manquantes}")
-    p = normaliser_modalites(profils)
-    blocs = {c: pd.to_numeric(p[c], errors="coerce").astype("float32") for c in NUMERIQUES}
-    for variable, modalites in CATEGORIELLES.items():
-        for m in modalites:
-            blocs[f"{variable}={m}"] = (p[variable] == m).astype("float32")
-    X = pd.DataFrame(blocs, index=profils.index)
-    return X[colonnes_modele()]
+    missing = [c for c in list(NUMERIC) + list(CATEGORICAL) if c not in profiles.columns]
+    if missing:
+        raise ValueError(f"Features missing from the profile: {missing}")
+    p = normalise_categories(profiles)
+    blocks = {c: pd.to_numeric(p[c], errors="coerce").astype("float32") for c in NUMERIC}
+    for feature, categories in CATEGORICAL.items():
+        for c in categories:
+            blocks[f"{feature}={c}"] = (p[feature] == c).astype("float32")
+    X = pd.DataFrame(blocks, index=profiles.index)
+    return X[model_columns()]
 
 
-def profil_par_defaut() -> dict:
-    """Profil fictif neutre, utilisé pour pré-remplir le formulaire."""
+def default_profile() -> dict:
+    """Neutral fictitious profile used to pre-fill the form."""
     return {
-        "AGE": 40, "ANCIENNETE_CLIENT": 8.0, "NB_COMPTES": 1, "SALAIRE": np.nan,
-        "DOSSIER_COMPLET": 1, "MOIS_DEPUIS_REVUE": 12, "MOIS_AVANT_PROCHAINE_REVUE": 36,
-        "STATUT_MARITAL": "M", "NATURE_CLIENT": "PPH", "SEGMENT": "Retail", "SCORE_KYC": "LR",
-        "ZONE_RESIDENCE": "LOCAL",
+        "AGE": 40, "CUSTOMER_TENURE": 8.0, "N_ACCOUNTS": 1, "SALARY": np.nan,
+        "FILE_COMPLETE": 1, "MONTHS_SINCE_REVIEW": 12, "MONTHS_TO_NEXT_REVIEW": 36,
+        "MARITAL_STATUS": "M", "CUSTOMER_TYPE": "PPH", "SEGMENT": "Retail", "KYC_SCORE": "LR",
+        "RESIDENCE_ZONE": "LOCAL",
     }

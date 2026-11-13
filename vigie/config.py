@@ -1,7 +1,7 @@
-"""Identité et paramètres du projet — source unique de vérité.
+"""Project identity and settings — single source of truth.
 
-Modifier ce fichier suffit pour changer un nom, une couleur ou un chemin
-dans tous les livrables générés (figures, application, rapport, slides).
+Editing this file is enough to change a name, a colour or a path in every
+generated deliverable (figures, application, report, slides).
 """
 
 from __future__ import annotations
@@ -10,62 +10,66 @@ import os
 from pathlib import Path
 
 # --------------------------------------------------------------------------
-# Identité
+# Identity
 # --------------------------------------------------------------------------
-NOM_PROJET = "VIGIE"
-SOUS_TITRE = "Analyse et prédiction du churn client"
-SIGNATURE = "Voir le churn venir, agir avant la clôture."
+PROJECT_NAME = "VIGIE"          # French for "lookout": the watch posted to spot trouble early
+SUBTITLE = "Customer churn analysis and prediction"
+TAGLINE = "See churn coming. Act before the account closes."
 
-ECOLE = "ESPRIT School of Business"
-PROGRAMME = "Licence 3 — Business Computing BI"
-MODULE = "Projet Intégré"
-GROUPE = "Groupe BI 5"
-ANNEE = "2026"
+SCHOOL = "ESPRIT School of Business"
+PROGRAMME = "Bachelor Year 3 — Business Computing (BI)"
+MODULE = "Integrated Project"
+GROUP = "Group BI 5"
+YEAR = "2026"
 
-EQUIPE = [
-    {"nom": "Raed Meddeb", "role": "Chef de projet · Machine Learning & application web"},
-    {"nom": "Salsabil Ben Elhadj", "role": "Data Warehouse & ETL (Talend, PostgreSQL)"},
-    {"nom": "Salah Chebbi", "role": "Séries temporelles & Deep Learning (LSTM)"},
-    {"nom": "Ines Ayed", "role": "Reporting Power BI, DAX & qualité des données"},
+TEAM = [
+    {"name": "Raed Meddeb", "role": "Project lead · Churn modelling (Machine Learning)",
+     "email": "raed.meddeb@esprit.tn"},
+    {"name": "Ibrahim Grira", "role": "Web application, UML & DevOps (tests, CI)",
+     "email": "ibrahim.grira@esprit.tn"},
+    {"name": "Salsabil Ben Elhadj", "role": "Data Warehouse & ETL (Talend, PostgreSQL)",
+     "email": "BenElhadj.Salsabil@esprit.tn"},
+    {"name": "Salah Chebbi", "role": "Time series & Deep Learning (LSTM)",
+     "email": "salah.chebbi@esprit.tn"},
+    {"name": "Ines Ayed", "role": "Power BI reporting, DAX & data quality",
+     "email": "ines.ayed@esprit.tn"},
 ]
-TUTEURS = ["Aymen Ben Brik", "Hela Hammami"]
+SUPERVISORS = ["Aymen Ben Brik", "Hela Hammami"]
+TEAM_LINE = " · ".join(m["name"] for m in TEAM)
 
 # --------------------------------------------------------------------------
-# Charte graphique (reprise dans Power BI, Streamlit, rapport et slides)
+# Visual identity (shared by Power BI, Streamlit, the report and the slides)
 # --------------------------------------------------------------------------
-COULEURS = {
-    "encre": "#14213D",      # titres, axes, texte fort
-    "churn": "#D62839",      # tout ce qui désigne le churn / le risque
-    "retention": "#2A9D8F",  # tout ce qui désigne les clients conservés
-    "ambre": "#F4A261",      # alerte intermédiaire, mise en avant
-    "ciel": "#457B9D",       # séries secondaires
-    "brume": "#E9ECEF",      # grilles, fonds de cartes
-    "papier": "#FAFAF7",     # fond de page
-    "texte": "#1F2937",
-    "gris": "#6B7280",
+COLORS = {
+    "ink": "#14213D",        # titles, axes, strong text
+    "churn": "#D62839",      # anything that denotes churn / risk
+    "retention": "#2A9D8F",  # anything that denotes retained customers
+    "amber": "#F4A261",      # intermediate alert, highlight
+    "sky": "#457B9D",        # secondary series
+    "mist": "#E9ECEF",       # grids, card backgrounds
+    "paper": "#FAFAF7",      # page background
+    "text": "#1F2937",
+    "grey": "#6B7280",
 }
-PALETTE = [
-    COULEURS["encre"], COULEURS["churn"], COULEURS["retention"],
-    COULEURS["ambre"], COULEURS["ciel"], COULEURS["gris"],
-]
+PALETTE = [COLORS["ink"], COLORS["churn"], COLORS["retention"], COLORS["amber"], COLORS["sky"], COLORS["grey"]]
 
 # --------------------------------------------------------------------------
-# Chemins
+# Paths
 # --------------------------------------------------------------------------
-RACINE = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1]
 
-# Les données ne sont JAMAIS dans le dépôt. Par défaut on les lit dans data/
-# (ignoré par git) ; la variable VIGIE_DATA_DIR permet de pointer ailleurs.
-DOSSIER_DONNEES = Path(os.environ.get("VIGIE_DATA_DIR", RACINE / "data"))
+# The data is NEVER in the repository. By default it is read from data/
+# (git-ignored); the VIGIE_DATA_DIR variable can point elsewhere.
+DATA_DIR = Path(os.environ.get("VIGIE_DATA_DIR", ROOT / "data"))
 
-FIGURES = RACINE / "06_rapport" / "figures"
-RESULTATS_ML = RACINE / "04_machine_learning" / "resultats"
-MODELES = RACINE / "04_machine_learning" / "models"      # hors dépôt (.gitignore)
-ARTEFACTS_APP = RACINE / "05_web_app" / "artifacts"      # agrégats + paramètres
+FIGURES = ROOT / "06_rapport" / "figures"
+ML_RESULTS = ROOT / "04_machine_learning" / "results"
+MODELS = ROOT / "04_machine_learning" / "models"      # outside the repository (.gitignore)
+APP_ARTIFACTS = ROOT / "05_web_app" / "artifacts"     # aggregates + model parameters
 
 # --------------------------------------------------------------------------
-# Règles métier partagées
+# Shared business rules
 # --------------------------------------------------------------------------
-GRAINE = 42                 # reproductibilité (découpages, modèles)
-SEUIL_PETIT_EFFECTIF = 20   # aucun agrégat publié en dessous de cet effectif
-PART_MASSE = 0.50           # opérations de masse : semaines cumulant 50 % des clôtures
+SEED = 42            # reproducibility (splits, models)
+MIN_CELL_SIZE = 20   # no aggregate is published below this headcount
+MASS_SHARE = 0.50    # mass operations: the weeks that add up to 50% of closures

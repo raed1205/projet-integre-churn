@@ -1,4 +1,4 @@
-"""Séries hebdomadaires de KPI et traitement des opérations de masse."""
+"""Weekly KPI series and the treatment of mass operations."""
 
 from __future__ import annotations
 
@@ -8,56 +8,55 @@ import pandas as pd
 from . import config
 
 
-def serie_hebdo(dates: pd.Series, debut=None, fin=None) -> pd.Series:
-    """Nombre d'événements par semaine (lundi), **semaines à zéro incluses**.
+def weekly_series(dates: pd.Series, start=None, end=None) -> pd.Series:
+    """Number of events per week (Monday), **zero weeks included**.
 
-    ``dates`` doit déjà être au grain voulu (un événement = une ligne).
+    ``dates`` must already be at the right grain (one event = one row).
     """
     d = dates.dropna()
-    comptage = d.groupby(d).size()
-    debut = debut if debut is not None else comptage.index.min()
-    fin = fin if fin is not None else comptage.index.max()
-    index = pd.date_range(debut, fin, freq="W-MON")
-    serie = comptage.reindex(index, fill_value=0).astype(int)
-    serie.index.name = "semaine"
-    return serie
+    counts = d.groupby(d).size()
+    start = start if start is not None else counts.index.min()
+    end = end if end is not None else counts.index.max()
+    index = pd.date_range(start, end, freq="W-MON")
+    series = counts.reindex(index, fill_value=0).astype(int)
+    series.index.name = "week"
+    return series
 
 
-def semaines_de_masse(serie: pd.Series, part: float = config.PART_MASSE) -> pd.DatetimeIndex:
-    """Opérations de masse = le plus petit ensemble de semaines cumulant ``part`` du volume.
+def mass_weeks(series: pd.Series, share: float = config.MASS_SHARE) -> pd.DatetimeIndex:
+    """Mass operations = the smallest set of weeks that adds up to ``share`` of the volume.
 
-    Règle simple, sans seuil arbitraire : on trie les semaines par volume décroissant
-    et on s'arrête dès que la part cumulée atteint ``part`` (50 % par défaut).
+    A simple rule with no arbitrary threshold: weeks are sorted by decreasing volume
+    and we stop as soon as the cumulative share reaches ``share`` (50% by default).
     """
-    tri = serie.sort_values(ascending=False)
-    cumul = tri.cumsum() / tri.sum()
-    n = int(np.argmax(cumul.values >= part)) + 1
-    return tri.index[:n].sort_values()
+    ranked = series.sort_values(ascending=False)
+    cumulative = ranked.cumsum() / ranked.sum()
+    n = int(np.argmax(cumulative.values >= share)) + 1
+    return ranked.index[:n].sort_values()
 
 
-def corriger_masse(serie: pd.Series, masse: pd.DatetimeIndex, demi_fenetre: int = 4) -> pd.Series:
-    """Série corrigée : chaque semaine de masse est remplacée par la médiane locale.
+def correct_mass_weeks(series: pd.Series, mass: pd.DatetimeIndex, half_window: int = 4) -> pd.Series:
+    """Corrected series: each mass week is replaced by the local median.
 
-    La médiane est prise sur les ``demi_fenetre`` semaines avant et après,
-    en excluant les autres semaines de masse. Le volume « ordinaire » est conservé,
-    l'opération exceptionnelle est retirée.
+    The median is taken over the ``half_window`` weeks before and after, leaving out
+    the other mass weeks. The ordinary volume is kept; the exceptional operation is removed.
     """
-    corrigee = serie.astype(float).copy()
-    ordinaire = serie.astype(float).copy()
-    ordinaire[masse] = np.nan
-    for semaine in masse:
-        pos = serie.index.get_loc(semaine)
-        voisinage = ordinaire.iloc[max(0, pos - demi_fenetre): pos + demi_fenetre + 1]
-        corrigee[semaine] = float(np.nanmedian(voisinage.values))
-    return corrigee.round().astype(int)
+    corrected = series.astype(float).copy()
+    ordinary = series.astype(float).copy()
+    ordinary[mass] = np.nan
+    for week in mass:
+        pos = series.index.get_loc(week)
+        neighbours = ordinary.iloc[max(0, pos - half_window): pos + half_window + 1]
+        corrected[week] = float(np.nanmedian(neighbours.values))
+    return corrected.round().astype(int)
 
 
-def fenetres(valeurs: np.ndarray, taille: int) -> tuple[np.ndarray, np.ndarray]:
-    """Fenêtres glissantes : X[i] = ``taille`` semaines, y[i] = la semaine suivante."""
+def windows(values: np.ndarray, size: int) -> tuple[np.ndarray, np.ndarray]:
+    """Sliding windows: X[i] = ``size`` weeks, y[i] = the following week."""
     X, y = [], []
-    for i in range(len(valeurs) - taille):
-        X.append(valeurs[i: i + taille])
-        y.append(valeurs[i + taille])
+    for i in range(len(values) - size):
+        X.append(values[i: i + size])
+        y.append(values[i + size])
     return np.asarray(X, dtype="float32"), np.asarray(y, dtype="float32")
 
 

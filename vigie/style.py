@@ -1,4 +1,4 @@
-"""Charte graphique matplotlib : toutes les figures du projet se ressemblent."""
+"""Matplotlib house style: every figure in the project looks the same."""
 
 from __future__ import annotations
 
@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 
 from . import config
 
-C = config.COULEURS
+C = config.COLORS
 
 
-def appliquer() -> None:
-    """Active le thème VIGIE pour toutes les figures matplotlib / seaborn."""
+def apply() -> None:
+    """Turn on the VIGIE theme for every matplotlib figure."""
     mpl.rcParams.update({
         "figure.figsize": (9, 4.6),
         "figure.dpi": 110,
@@ -21,9 +21,9 @@ def appliquer() -> None:
         "savefig.bbox": "tight",
         "figure.facecolor": "white",
         "axes.facecolor": "white",
-        "axes.edgecolor": C["brume"],
-        "axes.labelcolor": C["texte"],
-        "axes.titlecolor": C["encre"],
+        "axes.edgecolor": C["mist"],
+        "axes.labelcolor": C["text"],
+        "axes.titlecolor": C["ink"],
         "axes.titleweight": "bold",
         "axes.titlesize": 13,
         "axes.titlelocation": "left",
@@ -33,10 +33,10 @@ def appliquer() -> None:
         "axes.spines.right": False,
         "axes.grid": True,
         "axes.axisbelow": True,
-        "grid.color": C["brume"],
+        "grid.color": C["mist"],
         "grid.linewidth": 0.8,
-        "xtick.color": C["gris"],
-        "ytick.color": C["gris"],
+        "xtick.color": C["grey"],
+        "ytick.color": C["grey"],
         "xtick.labelsize": 9,
         "ytick.labelsize": 9,
         "legend.frameon": False,
@@ -46,33 +46,25 @@ def appliquer() -> None:
     })
 
 
-def signer(fig, source: str = "data_churn.csv (jeu anonymisé)") -> None:
-    """Ajoute la signature du groupe et la source sous la figure (traçabilité)."""
-    fig.text(
-        0.005, -0.02,
-        f"{config.NOM_PROJET} · {config.GROUPE} · Source : {source}",
-        fontsize=7.5, color=C["gris"], ha="left", va="top",
-    )
+def sign(fig, source: str = "data_churn.csv (anonymised dataset)") -> None:
+    """Add the group signature and the source under the figure (traceability)."""
+    fig.text(0.005, -0.02, f"{config.PROJECT_NAME} · {config.GROUP} · Source: {source}",
+             fontsize=7.5, color=C["grey"], ha="left", va="top")
 
 
-def enregistrer(fig, nom: str, source: str | None = None) -> Path:
-    """Signe puis enregistre la figure dans 06_rapport/figures/."""
-    signer(fig, source) if source else signer(fig)
+def save(fig, name: str, source: str | None = None) -> Path:
+    """Sign the figure, then save it to 06_rapport/figures/."""
+    sign(fig, source) if source else sign(fig)
     config.FIGURES.mkdir(parents=True, exist_ok=True)
-    chemin = config.FIGURES / f"{nom}.png"
-    fig.savefig(chemin)
-    return chemin
+    path = config.FIGURES / f"{name}.png"
+    fig.savefig(path)
+    return path
 
 
-def milliers(x, _pos=None) -> str:
-    """Format français des milliers : 12 345."""
-    return f"{x:,.0f}".replace(",", " ")
+def thousands(x, _pos=None) -> str:
+    """Thousands separator: 12,345."""
+    return f"{x:,.0f}"
 
 
-def pourcent(x, _pos=None) -> str:
+def percent(x, _pos=None) -> str:
     return f"{x:.0%}"
-
-
-def nouvelle_figure(**kw):
-    appliquer()
-    return plt.subplots(**kw)
