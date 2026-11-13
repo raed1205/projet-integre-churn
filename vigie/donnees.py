@@ -114,17 +114,22 @@ def grain_compte(df: pd.DataFrame) -> pd.DataFrame:
     1. on écarte les lignes sans ``ACCOUNT_NO`` (clients sans compte) ;
     2. quand un compte porte plusieurs dates de clôture, on garde la **première**
        (c'est l'événement de churn ; les suivantes sont des régularisations) ;
-    3. ``NB_LIGNES_SOURCE`` conserve le nombre de lignes fusionnées, pour le contrôle.
+    3. dans les rares cas (16 comptes) où le taux fixe diffère d'une ligne à l'autre,
+       on garde le plus élevé — règle arbitraire mais déterministe ;
+    4. ``NB_LIGNES_SOURCE`` conserve le nombre de lignes fusionnées, pour le contrôle.
     """
     a = df[df["ACCOUNT_NO"].notna()]
-    nb = a.groupby("ACCOUNT_NO", sort=False).size().rename("NB_LIGNES_SOURCE")
+    par_compte = a.groupby("ACCOUNT_NO", sort=False)
+    nb = par_compte.size().rename("NB_LIGNES_SOURCE")
+    taux = par_compte["FIXEDRATE"].max()
     comptes = (
         a.sort_values(["ACCOUNT_NO", "ACCT_CLOSE_DATE", "CLOSURE_REASON"], na_position="last")
         .drop_duplicates("ACCOUNT_NO", keep="first")
         .set_index("ACCOUNT_NO")
         .join(nb)
-        .reset_index()
     )
+    comptes["FIXEDRATE"] = taux
+    comptes = comptes.reset_index()
     comptes["CHURN"] = (comptes["ACCOUNT_STATUS"] == "Closed").astype(int)
     return comptes
 

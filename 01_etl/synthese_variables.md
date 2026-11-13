@@ -21,7 +21,7 @@ Méthode outliers : **IQR** (hors de `[Q1 − 1,5·IQR ; Q3 + 1,5·IQR]`, métho
 | `LAST_REVIEW_DATE` | Date (mois) | 5.6 | 7.4 | Structurel (client sans compte) | — | — | Convertir ; dériver les mois depuis la revue |
 | `NEXT__REVIEW_DATE` | Date (mois) | 5.0 | 6.6 | Structurel (client sans compte) | — | — | Convertir ; dériver les mois avant la revue |
 | `ACCOUNT_STATUS` | Binaire — cible | 9.1 | 0.0 | Structurel (client sans compte) | — | — | Cible : Closed = 1, Active = 0 |
-| `ACCT_OPENING_DATE` | Date (semaine) | 29.9 | 24.5 | Lié à la clôture ⚠ | — | — | Convertir ; exclue du modèle (fuite) |
+| `ACCT_OPENING_DATE` | Date (semaine) | 29.9 | 24.5 | Lié à la clôture ⚠ | — | — | Convertir ; signaler si postérieure à la clôture ; exclue du modèle (fuite) |
 | `ACCOUNT_CATEGORY` | Qualitative (14) | 29.9 | 24.5 | Lié à la clôture ⚠ | — | — | Joindre le référentiel ; exclue du modèle (fuite) |
 | `ACCOUNT_TYPE_DESC` | Qualitative (14) | 29.9 | 24.5 | Lié à la clôture ⚠ | — | — | Redondante avec ACCOUNT_CATEGORY |
 | `CURRENCY` | Qualitative (5) | 29.9 | 24.5 | Lié à la clôture ⚠ | — | — | Joindre le référentiel ; exclue du modèle (fuite) |
