@@ -49,5 +49,8 @@ if __name__ == "__main__":
                    resources={"metadata": {"path": str(dst.parent)}}).execute()
     for i, c in enumerate(nb.cells):
         c["id"] = f"cellule-{i:03d}"
+        if c.cell_type == "code":      # on retire les journaux techniques (stderr) des sorties
+            c["outputs"] = [o for o in c["outputs"]
+                            if not (o.get("output_type") == "stream" and o.get("name") == "stderr")]
     nbformat.write(nb, dst)
     print(f"{dst} : {len(nb.cells)} cellules exécutées")
