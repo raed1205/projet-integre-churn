@@ -63,6 +63,16 @@ LIBELLES_MODALITES = {
 }
 
 
+# Règle métier constatée dans les données : la durée du cycle de revue dépend du score KYC
+# (98 à 99 % des clients de chaque score). La prochaine revue se déduit donc de la dernière.
+CYCLE_REVUE_MOIS = {"LR": 48, "MR": 36, "H1": 24, "H2": 24, "H3": 24, "NR": 48}
+
+
+def mois_avant_prochaine_revue(score_kyc: str, mois_depuis_revue: float) -> float:
+    """Mois restants avant la prochaine revue (négatif = revue en retard)."""
+    return CYCLE_REVUE_MOIS.get(score_kyc, 48) - mois_depuis_revue
+
+
 def colonnes_modele() -> list[str]:
     """Liste ordonnée des colonnes attendues par le modèle."""
     cols = list(NUMERIQUES)
@@ -108,7 +118,7 @@ def profil_par_defaut() -> dict:
     """Profil fictif neutre, utilisé pour pré-remplir le formulaire."""
     return {
         "AGE": 40, "ANCIENNETE_CLIENT": 8.0, "NB_COMPTES": 1, "SALAIRE": np.nan,
-        "DOSSIER_COMPLET": 1, "MOIS_DEPUIS_REVUE": 24, "MOIS_AVANT_PROCHAINE_REVUE": 12,
+        "DOSSIER_COMPLET": 1, "MOIS_DEPUIS_REVUE": 12, "MOIS_AVANT_PROCHAINE_REVUE": 36,
         "STATUT_MARITAL": "M", "NATURE_CLIENT": "PPH", "SEGMENT": "Retail", "SCORE_KYC": "LR",
         "ZONE_RESIDENCE": "LOCAL",
     }

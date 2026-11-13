@@ -1,0 +1,41 @@
+@startuml sequence_prediction
+!include _style.iuml
+title Diagramme de séquence — demande de prédiction pour un profil fictif
+
+actor "Conseiller" as U
+participant "Page\nPrédiction du churn" as P
+participant "preprocessing\n(encodeur)" as E
+participant "ModeleChurn" as M
+participant "Booster\nXGBoost" as X
+participant "DepotArtefacts" as D
+
+== Au premier affichage de la page (mis en cache) ==
+P -> M : ModeleChurn()
+M -> D : meta_modele()
+D --> M : seuil, colonnes, table score → taux observé
+M -> X : load_model(modele_churn.json)
+M -> E : colonnes_modele()
+E --> M : 31 colonnes attendues
+M --> P : modèle prêt
+
+== Scénario principal ==
+U -> P : saisit le profil et clique\nsur « Calculer le score »
+P -> E : mois_avant_prochaine_revue(score KYC, mois depuis revue)
+E --> P : prochaine revue déduite du cycle KYC
+P -> M : predire(profil)
+M -> E : encoder(profil)
+E --> M : vecteur de 31 variables
+M -> X : predict(vecteur)
+X --> M : probabilité de départ
+M -> X : predict(vecteur, pred_contribs = true)
+X --> M : contribution de chaque variable (SHAP)
+M -> M : niveau_de_risque(score)\ntaux_observe(score)
+M --> P : Prediction(score, niveau, facteurs)
+P --> U : jauge, niveau de risque,\nfacteurs explicatifs, piste d'action
+
+alt variable absente du profil
+  E --> M : ValueError
+  M --> P : erreur
+  P --> U : message d'erreur
+end
+@enduml

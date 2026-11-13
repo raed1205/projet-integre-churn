@@ -144,6 +144,9 @@ def marginales(profils: pd.DataFrame, numeriques: list[str], categorielles: dict
     out = {"numeriques": {}, "categorielles": {}}
     for col in numeriques:
         s = profils[col].dropna()
+        entiere = bool((s == s.round()).all())
+        if entiere and s.nunique() > 15 and s.quantile(0.99) <= 15:
+            s = s.clip(upper=s.quantile(0.99))      # variable de comptage : on regroupe la queue (≥ 99e centile)
         valeurs = s.value_counts(normalize=True)
         if len(valeurs) <= 15:      # variable discrète : fréquences
             out["numeriques"][col] = {

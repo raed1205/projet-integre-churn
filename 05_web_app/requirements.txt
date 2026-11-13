@@ -1,0 +1,6 @@
+# Dépendances de l'application uniquement (légères : ni TensorFlow, ni scikit-learn).
+streamlit>=1.36
+pandas>=2.0
+numpy>=1.24
+xgboost>=2.0
+plotly>=5.17

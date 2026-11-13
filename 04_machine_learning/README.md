@@ -81,7 +81,7 @@ le seul indicateur « la valeur est vide ».
 | Modèle | ROC-AUC | PR-AUC | Precision | Recall | F1 |
 |---|---:|---:|---:|---:|---:|
 | Référence (taux moyen) | 0,500 | 0,369 | — | — | — |
-| Régression logistique | 0,686 | 0,538 | 0,518 | 0,675 | 0,586 |
+| Régression logistique | 0,686 | 0,538 | 0,518 | 0,676 | 0,586 |
 | Random Forest | 0,748 | 0,607 | 0,515 | 0,813 | 0,630 |
 | **XGBoost optimisé (retenu)** | **0,751** | **0,611** | 0,526 | 0,790 | **0,632** |
 

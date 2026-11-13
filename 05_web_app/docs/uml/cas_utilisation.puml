@@ -1,0 +1,46 @@
+@startuml cas_utilisation
+!pragma layout smetana
+!include _style.iuml
+left to right direction
+title Diagramme de cas d'utilisation global — application VIGIE
+
+actor "Conseiller\nclientèle" as Conseiller
+actor "Responsable\nrétention" as Responsable
+actor "Analyste BI\n(Groupe BI 5)" as Analyste
+actor "Tuteur /\nvisiteur" as Visiteur
+
+rectangle "Application web VIGIE" {
+  usecase "Consulter les KPI\nde synthèse" as UC1
+  usecase "Prédire le risque de churn\nd'un profil fictif" as UC2
+  usecase "Comprendre les facteurs\ndu score (SHAP)" as UC3
+  usecase "Consulter la prévision\ndes clôtures (LSTM)" as UC4
+  usecase "Comparer le LSTM\naux références simples" as UC5
+  usecase "Explorer le churn\npar segment" as UC6
+  usecase "Simuler un portefeuille\nde profils fictifs" as UC7
+  usecase "Consulter la méthode\net la fiche du modèle" as UC8
+}
+
+rectangle "Hors application (poste de l'analyste)" {
+  usecase "Ré-entraîner les modèles\net publier les artefacts" as UC9
+}
+
+Conseiller --> UC1
+Conseiller --> UC2
+Responsable --> UC1
+Responsable --> UC4
+Responsable --> UC6
+Responsable --> UC7
+Visiteur --> UC1
+Visiteur --> UC8
+Analyste --> UC8
+Analyste --> UC9
+
+UC2 ..> UC3 : <<include>>
+UC7 ..> UC2 : <<include>>
+UC5 ..> UC4 : <<extend>>
+
+legend bottom right
+  Les artefacts publiés sont des agrégats et des paramètres
+  de modèle (JSON). Aucune donnée client ne quitte le poste.
+endlegend
+@enduml

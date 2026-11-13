@@ -1,0 +1,25 @@
+# Intégration continue — VIGIE · Groupe BI 5
+# À chaque envoi de code : les tests de l'application et les garde-fous de confidentialité.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: 05_web_app/requirements.txt
+
+      - name: Installer les dépendances de l'application
+        run: pip install -r 05_web_app/requirements.txt pytest
+
+      - name: Tests (encodage, modèle, application, confidentialité)
+        run: pytest 05_web_app/tests -v

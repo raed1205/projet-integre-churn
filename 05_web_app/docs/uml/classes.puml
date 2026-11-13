@@ -1,0 +1,79 @@
+@startuml classes
+!pragma layout smetana
+!include _style.iuml
+title Diagramme de classes — application VIGIE (05_web_app)
+
+package "utils.artefacts" {
+  class DepotArtefacts {
+    + dossier : Path
+    + kpi_synthese() : dict
+    + prevision_kpi() : dict
+    + meta_modele() : dict
+    + chemin_modele : Path
+  }
+}
+
+package "utils.preprocessing" {
+  class Encodeur <<module>> {
+    + NUMERIQUES : list
+    + CATEGORIELLES : dict
+    + CYCLE_REVUE_MOIS : dict
+    + colonnes_modele() : list
+    + encoder(profils) : DataFrame
+    + normaliser_modalites(profils) : DataFrame
+    + mois_avant_prochaine_revue(kyc, mois) : float
+    + profil_par_defaut() : dict
+  }
+}
+
+package "utils.model" {
+  class ModeleChurn {
+    + colonnes : list
+    + seuil_alerte : float
+    + meta : dict
+    - _booster : xgboost.Booster
+    + scores(profils) : ndarray
+    + contributions(profils) : DataFrame
+    + taux_observe(score) : float
+    + predire(profil) : Prediction
+  }
+  class Prediction {
+    + score : float
+    + niveau : str
+    + couleur : str
+    + au_dessus_du_seuil : bool
+    + taux_observe : float
+    + contributions : Series
+    + facteurs(n) : DataFrame
+  }
+  class GenerateurFictif {
+    + marginales : dict
+    + generer(n) : DataFrame
+  }
+}
+
+package "pages" {
+  class PageVueEnsemble <<page>>
+  class PagePrediction <<page>>
+  class PagePrevision <<page>>
+  class PageSegments <<page>>
+  class PageMethode <<page>>
+}
+
+class Application <<app.py>> {
+  + PAGES : list
+  + navigation()
+}
+
+Application "1" o-- "5" PageVueEnsemble : déclare les pages
+ModeleChurn "1" *-- "1" DepotArtefacts : lit ses paramètres
+ModeleChurn ..> Encodeur : encode les profils
+ModeleChurn ..> Prediction : crée
+GenerateurFictif ..> Encodeur : applique le cycle de revue
+PagePrediction --> ModeleChurn : predire()
+PagePrediction --> GenerateurFictif : generer()
+PageVueEnsemble --> DepotArtefacts : kpi_synthese()
+PagePrevision --> DepotArtefacts : prevision_kpi()
+PageSegments --> DepotArtefacts : kpi_synthese()
+PageMethode --> DepotArtefacts : meta_modele()
+@enduml

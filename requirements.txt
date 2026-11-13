@@ -1,0 +1,44 @@
+# =========================================================
+# VIGIE · Groupe BI 5 — dépendances du projet complet
+# (l'application seule : voir 05_web_app/requirements.txt)
+# Testé avec Python 3.11 à 3.13.
+# =========================================================
+
+# Manipulation et exploration de données
+pandas>=2.2
+numpy>=1.26
+openpyxl>=3.1
+scipy>=1.11
+
+# Visualisation
+matplotlib>=3.8
+plotly>=5.17
+
+# Entrepôt PostgreSQL (pipeline Python, bonus)
+psycopg2-binary>=2.9
+
+# Série temporelle et Deep Learning (LSTM / RNN)
+statsmodels>=0.14
+tensorflow>=2.16
+
+# Machine Learning
+scikit-learn>=1.4
+xgboost>=2.0
+shap>=0.45
+joblib>=1.3
+
+# Application web
+streamlit>=1.36
+
+# Notebooks
+jupyterlab>=4.0
+ipykernel>=6.25
+nbclient>=0.10
+nbformat>=5.9
+
+# Bonus : web scraping
+requests>=2.31
+beautifulsoup4>=4.12
+
+# Bonus : tests DevOps
+pytest>=8.0

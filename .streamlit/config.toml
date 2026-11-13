@@ -1,0 +1,14 @@
+# Thème VIGIE — même charte que le rapport, les slides et Power BI.
+[theme]
+base = "light"
+primaryColor = "#D62839"
+backgroundColor = "#FAFAF7"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2937"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"
