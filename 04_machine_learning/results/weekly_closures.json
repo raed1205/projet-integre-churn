@@ -1,8 +1,8 @@
 {
- "kpi": "Nombre hebdomadaire de clôtures de comptes",
- "grain": "compte (première date de clôture)",
+ "kpi": "Weekly number of account closures",
+ "grain": "account (first closing date)",
  "source_sha256": "858551b4293ee1abce4d3aaeac3dea07d817cfd80e111dd52dcff5b06d9fb732",
- "semaines": [
+ "weeks": [
   "2020-04-13",
   "2020-04-20",
   "2020-04-27",
@@ -206,7 +206,7 @@
   "2024-02-12",
   "2024-02-19"
  ],
- "brute": [
+ "raw": [
   9,
   51,
   53,
@@ -410,7 +410,7 @@
   272,
   388
  ],
- "corrigee": [
+ "corrected": [
   9,
   51,
   53,
@@ -614,7 +614,7 @@
   272,
   388
  ],
- "semaines_de_masse": [
+ "mass_weeks": [
   "2020-09-21",
   "2021-04-12",
   "2021-11-01",
@@ -623,36 +623,36 @@
  ],
  "regimes": [
   {
-   "Régime": 1,
-   "Début": "13/04/2020",
-   "Fin": "21/06/2021",
-   "Semaines": 63,
-   "Médiane": 221.0,
-   "Moyenne": 334.0,
-   "Semaines ≤ 20 clôtures": "8%",
-   "Semaines à zéro": 0,
+   "Regime": 1,
+   "Start": "13/04/2020",
+   "End": "21/06/2021",
+   "Weeks": 63,
+   "Median": 221.0,
+   "Mean": 334.0,
+   "Weeks ≤ 20 closures": "8%",
+   "Zero weeks": 0,
    "Maximum": 3470
   },
   {
-   "Régime": 2,
-   "Début": "28/06/2021",
-   "Fin": "22/05/2023",
-   "Semaines": 100,
-   "Médiane": 6.0,
-   "Moyenne": 329.8,
-   "Semaines ≤ 20 clôtures": "75%",
-   "Semaines à zéro": 11,
+   "Regime": 2,
+   "Start": "28/06/2021",
+   "End": "22/05/2023",
+   "Weeks": 100,
+   "Median": 6.0,
+   "Mean": 329.8,
+   "Weeks ≤ 20 closures": "75%",
+   "Zero weeks": 11,
    "Maximum": 3376
   },
   {
-   "Régime": 3,
-   "Début": "29/05/2023",
-   "Fin": "19/02/2024",
-   "Semaines": 39,
-   "Médiane": 322.0,
-   "Moyenne": 488.9,
-   "Semaines ≤ 20 clôtures": "3%",
-   "Semaines à zéro": 0,
+   "Regime": 3,
+   "Start": "29/05/2023",
+   "End": "19/02/2024",
+   "Weeks": 39,
+   "Median": 322.0,
+   "Mean": 488.9,
+   "Weeks ≤ 20 closures": "3%",
+   "Zero weeks": 0,
    "Maximum": 2732
   }
  ]

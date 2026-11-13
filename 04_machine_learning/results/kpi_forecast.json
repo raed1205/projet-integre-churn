@@ -1,74 +1,74 @@
 {
  "source_sha256": "858551b4293ee1abce4d3aaeac3dea07d817cfd80e111dd52dcff5b06d9fb732",
- "clotures_hebdo": {
-  "decoupage": {
-   "semaines": 202,
+ "weekly_closures": {
+  "split": {
+   "weeks": 202,
    "train": 142,
    "validation": 20,
    "test": 40,
-   "fenetre": 8,
-   "debut_test": "2023-05-22",
-   "fin_test": "2024-02-19"
+   "window": 8,
+   "test_start": "2023-05-22",
+   "test_end": "2024-02-19"
   },
-  "comparaison": [
+  "comparison": [
    {
-    "Modèle": "Naïve (dernière valeur)",
-    "Type": "Référence",
+    "Model": "Naive (last value)",
+    "Type": "Reference",
     "MAE": 478.3,
     "RMSE": 859.478126539588
    },
    {
-    "Modèle": "Moyenne mobile 4 semaines",
-    "Type": "Référence",
+    "Model": "4-week moving average",
+    "Type": "Reference",
     "MAE": 373.03125,
     "RMSE": 575.3383175901811
    },
    {
-    "Modèle": "Médiane mobile 8 semaines",
-    "Type": "Référence",
+    "Model": "8-week moving median",
+    "Type": "Reference",
     "MAE": 272.4,
     "RMSE": 549.7668824147195
    },
    {
-    "Modèle": "ARIMA(2, 1, 2)",
-    "Type": "Référence",
+    "Model": "ARIMA(2, 1, 2)",
+    "Type": "Reference",
     "MAE": 334.7088599433694,
     "RMSE": 576.710180785083
    },
    {
-    "Modèle": "LSTM",
+    "Model": "LSTM",
     "Type": "Deep Learning",
     "MAE": 287.1853593636096,
     "RMSE": 577.2497439880215,
-    "MAE écart-type": 6.423401053861104,
-    "RMSE écart-type": 7.595838525103753,
-    "Époques": [
+    "MAE std": 6.423401053861104,
+    "RMSE std": 7.595838525103753,
+    "Epochs": [
      70,
      60,
      64
     ]
    },
    {
-    "Modèle": "RNN simple",
+    "Model": "Simple RNN",
     "Type": "Deep Learning",
     "MAE": 323.60463708263177,
     "RMSE": 607.6513955472817,
-    "MAE écart-type": 9.285312142723768,
-    "RMSE écart-type": 3.408450078754484,
-    "Époques": [
+    "MAE std": 9.285312142723768,
+    "RMSE std": 3.408450078754484,
+    "Epochs": [
      33,
      56,
      33
     ]
    }
   ],
-  "ordre_arima": [
+  "arima_order": [
    2,
    1,
    2
   ],
   "test": {
-   "semaines": [
+   "weeks": [
     "2023-05-22",
     "2023-05-29",
     "2023-06-05",
@@ -110,7 +110,7 @@
     "2024-02-12",
     "2024-02-19"
    ],
-   "reel": [
+   "actual": [
     11,
     5,
     342,
@@ -152,8 +152,8 @@
     272,
     388
    ],
-   "previsions": {
-    "Naïve (dernière valeur)": [
+   "forecasts": {
+    "Naive (last value)": [
      2694.0,
      11.0,
      5.0,
@@ -195,7 +195,7 @@
      493.0,
      272.0
     ],
-    "Moyenne mobile 4 semaines": [
+    "4-week moving average": [
      678.5,
      681.0,
      680.5,
@@ -237,7 +237,7 @@
      859.0,
      828.5
     ],
-    "Médiane mobile 8 semaines": [
+    "8-week moving median": [
      8.5,
      9.5,
      9.0,
@@ -363,7 +363,7 @@
      385.8,
      293.5
     ],
-    "RNN simple": [
+    "Simple RNN": [
      12.5,
      8.4,
      5.8,
@@ -407,8 +407,8 @@
     ]
    }
   },
-  "futur": {
-   "semaines": [
+  "future": {
+   "weeks": [
     "2024-02-26",
     "2024-03-04",
     "2024-03-11",
@@ -418,7 +418,7 @@
     "2024-04-08",
     "2024-04-15"
    ],
-   "prevision": [
+   "forecast": [
     276.0,
     245.3,
     223.0,
@@ -428,7 +428,7 @@
     169.6,
     161.5
    ],
-   "bas": [
+   "low": [
     192.7,
     171.2,
     155.6,
@@ -438,7 +438,7 @@
     118.2,
     112.6
    ],
-   "haut": [
+   "high": [
     1468.3,
     1305.5,
     1187.2,
@@ -450,75 +450,75 @@
    ]
   }
  },
- "clients_perdus_hebdo": {
-  "decoupage": {
-   "semaines": 202,
+ "weekly_customers_lost": {
+  "split": {
+   "weeks": 202,
    "train": 142,
    "validation": 20,
    "test": 40,
-   "fenetre": 8,
-   "debut_test": "2023-05-22",
-   "fin_test": "2024-02-19"
+   "window": 8,
+   "test_start": "2023-05-22",
+   "test_end": "2024-02-19"
   },
-  "comparaison": [
+  "comparison": [
    {
-    "Modèle": "Naïve (dernière valeur)",
-    "Type": "Référence",
+    "Model": "Naive (last value)",
+    "Type": "Reference",
     "MAE": 227.2,
     "RMSE": 459.46827964506974
    },
    {
-    "Modèle": "Moyenne mobile 4 semaines",
-    "Type": "Référence",
+    "Model": "4-week moving average",
+    "Type": "Reference",
     "MAE": 196.41875,
     "RMSE": 275.97957635031617
    },
    {
-    "Modèle": "Médiane mobile 8 semaines",
-    "Type": "Référence",
+    "Model": "8-week moving median",
+    "Type": "Reference",
     "MAE": 133.3,
     "RMSE": 216.3661537764167
    },
    {
-    "Modèle": "ARIMA(2, 1, 2)",
-    "Type": "Référence",
+    "Model": "ARIMA(2, 1, 2)",
+    "Type": "Reference",
     "MAE": 159.8836744373919,
     "RMSE": 248.945217705191
    },
    {
-    "Modèle": "LSTM",
+    "Model": "LSTM",
     "Type": "Deep Learning",
     "MAE": 124.50102493605374,
     "RMSE": 220.18357455402028,
-    "MAE écart-type": 1.0285304845299013,
-    "RMSE écart-type": 4.437390559238855,
-    "Époques": [
+    "MAE std": 1.0285304845299013,
+    "RMSE std": 4.437390559238855,
+    "Epochs": [
      65,
      59,
      73
     ]
    },
    {
-    "Modèle": "RNN simple",
+    "Model": "Simple RNN",
     "Type": "Deep Learning",
     "MAE": 143.63011559149803,
     "RMSE": 232.84361738503807,
-    "MAE écart-type": 4.553787035321952,
-    "RMSE écart-type": 6.434062654690869,
-    "Époques": [
+    "MAE std": 4.553787035321952,
+    "RMSE std": 6.434062654690869,
+    "Epochs": [
      41,
      58,
      33
     ]
    }
   ],
-  "ordre_arima": [
+  "arima_order": [
    2,
    1,
    2
   ],
   "test": {
-   "semaines": [
+   "weeks": [
     "2023-05-22",
     "2023-05-29",
     "2023-06-05",
@@ -560,7 +560,7 @@
     "2024-02-12",
     "2024-02-19"
    ],
-   "reel": [
+   "actual": [
     4,
     4,
     40,
@@ -602,8 +602,8 @@
     57,
     164
    ],
-   "previsions": {
-    "Naïve (dernière valeur)": [
+   "forecasts": {
+    "Naive (last value)": [
      2266.0,
      4.0,
      4.0,
@@ -645,7 +645,7 @@
      113.0,
      57.0
     ],
-    "Moyenne mobile 4 semaines": [
+    "4-week moving average": [
      569.2,
      570.0,
      569.8,
@@ -687,7 +687,7 @@
      193.8,
      198.2
     ],
-    "Médiane mobile 8 semaines": [
+    "8-week moving median": [
      4.5,
      4.5,
      4.5,
@@ -813,7 +813,7 @@
      103.5,
      87.4
     ],
-    "RNN simple": [
+    "Simple RNN": [
      3.9,
      2.0,
      2.0,
@@ -857,8 +857,8 @@
     ]
    }
   },
-  "futur": {
-   "semaines": [
+  "future": {
+   "weeks": [
     "2024-02-26",
     "2024-03-04",
     "2024-03-11",
@@ -868,7 +868,7 @@
     "2024-04-08",
     "2024-04-15"
    ],
-   "prevision": [
+   "forecast": [
     100.3,
     101.8,
     102.3,
@@ -878,7 +878,7 @@
     88.0,
     83.9
    ],
-   "bas": [
+   "low": [
     52.1,
     52.9,
     53.2,
@@ -888,7 +888,7 @@
     45.7,
     43.5
    ],
-   "haut": [
+   "high": [
     632.9,
     642.5,
     645.1,

@@ -1,12 +1,12 @@
-"""Prédiction du churn au grain client : découpage, modèles, évaluation, fuite de cible.
+"""Churn prediction at customer grain: split, models, evaluation, target leakage.
 
-Principes :
+Principles:
 
-* **un client = une ligne** ; le découpage se fait par client (``GroupShuffleSplit``),
-  un client ne peut donc pas être à la fois dans l'entraînement et dans le test ;
-* trois jeux : entraînement (70 %), validation (15 % — choix du seuil), test (15 % — jamais
-  utilisé avant l'évaluation finale) ;
-* on ne juge pas un modèle sur l'accuracy seule : precision, recall, F1, ROC-AUC, PR-AUC.
+* **one customer = one row**; the split is made per customer (``GroupShuffleSplit``), so a
+  customer can never be in both the training and the test set;
+* three sets: training (70%), validation (15% — choice of the threshold), test (15% — never
+  used before the final evaluation);
+* a model is not judged on accuracy alone: precision, recall, F1, ROC-AUC, PR-AUC.
 """
 
 from __future__ import annotations
@@ -28,59 +28,59 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from xgboost import XGBClassifier
 
-RACINE = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(RACINE))
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 from vigie import config  # noqa: E402
 
-GRAINE = config.GRAINE
+SEED = config.SEED
 
 
 # --------------------------------------------------------------------------
-# Découpage
+# Split
 # --------------------------------------------------------------------------
-def decouper(y: np.ndarray, groupes: np.ndarray) -> dict[str, np.ndarray]:
-    """70 % entraînement / 15 % validation / 15 % test, **par client**."""
+def split(y: np.ndarray, groups: np.ndarray) -> dict[str, np.ndarray]:
+    """70% training / 15% validation / 15% test, **per customer**."""
     indices = np.arange(len(y))
-    reste, test = next(GroupShuffleSplit(1, test_size=0.15, random_state=GRAINE).split(indices, y, groupes))
-    train, validation = next(GroupShuffleSplit(1, test_size=0.15 / 0.85, random_state=GRAINE)
-                             .split(reste, y[reste], groupes[reste]))
-    decoupage = {"train": reste[train], "validation": reste[validation], "test": test}
-    # Garde-fou : aucun client commun entre deux jeux.
-    ensembles = {k: set(groupes[v]) for k, v in decoupage.items()}
-    assert not (ensembles["train"] & ensembles["test"])
-    assert not (ensembles["train"] & ensembles["validation"])
-    assert not (ensembles["validation"] & ensembles["test"])
-    return decoupage
+    rest, test = next(GroupShuffleSplit(1, test_size=0.15, random_state=SEED).split(indices, y, groups))
+    train, validation = next(GroupShuffleSplit(1, test_size=0.15 / 0.85, random_state=SEED)
+                             .split(rest, y[rest], groups[rest]))
+    parts = {"train": rest[train], "validation": rest[validation], "test": test}
+    # Safety net: no customer shared between two sets.
+    sets = {k: set(groups[v]) for k, v in parts.items()}
+    assert not (sets["train"] & sets["test"])
+    assert not (sets["train"] & sets["validation"])
+    assert not (sets["validation"] & sets["test"])
+    return parts
 
 
 # --------------------------------------------------------------------------
-# Modèles
+# Models
 # --------------------------------------------------------------------------
-PARAMS_XGB_DEFAUT = dict(n_estimators=300, max_depth=6, learning_rate=0.08, subsample=0.8,
-                         colsample_bytree=0.8, min_child_weight=5)
+DEFAULT_XGB_PARAMS = dict(n_estimators=300, max_depth=6, learning_rate=0.08, subsample=0.8,
+                          colsample_bytree=0.8, min_child_weight=5)
 
 
 def xgboost(**params) -> XGBClassifier:
-    reglages = {**PARAMS_XGB_DEFAUT, **params}
-    return XGBClassifier(**reglages, tree_method="hist", eval_metric="logloss", n_jobs=4, random_state=GRAINE)
+    settings = {**DEFAULT_XGB_PARAMS, **params}
+    return XGBClassifier(**settings, tree_method="hist", eval_metric="logloss", n_jobs=4, random_state=SEED)
 
 
-def modeles() -> dict:
-    """Les modèles comparés, du plus simple au plus flexible."""
-    imputation = lambda: SimpleImputer(strategy="median", add_indicator=True)  # noqa: E731
+def models() -> dict:
+    """The models compared, from the simplest to the most flexible."""
+    imputer = lambda: SimpleImputer(strategy="median", add_indicator=True)  # noqa: E731
     return {
-        "Référence (taux moyen)": DummyClassifier(strategy="prior"),
-        "Régression logistique": make_pipeline(imputation(), StandardScaler(),
-                                               LogisticRegression(max_iter=1000, random_state=GRAINE)),
-        "Random Forest": make_pipeline(imputation(), RandomForestClassifier(
-            n_estimators=300, min_samples_leaf=20, n_jobs=4, random_state=GRAINE)),
+        "Baseline (average rate)": DummyClassifier(strategy="prior"),
+        "Logistic regression": make_pipeline(imputer(), StandardScaler(),
+                                             LogisticRegression(max_iter=1000, random_state=SEED)),
+        "Random Forest": make_pipeline(imputer(), RandomForestClassifier(
+            n_estimators=300, min_samples_leaf=20, n_jobs=4, random_state=SEED)),
         "XGBoost": xgboost(),
     }
 
 
-def optimiser_xgboost(X, y, groupes, n_iter: int = 12):
-    """Recherche aléatoire d'hyperparamètres, validation croisée **par client** (3 plis)."""
-    grille = {
+def tune_xgboost(X, y, groups, n_iter: int = 12):
+    """Random search of hyperparameters, cross-validation **per customer** (3 folds)."""
+    grid = {
         "n_estimators": [200, 300, 400, 600],
         "max_depth": [4, 5, 6, 7, 8],
         "learning_rate": [0.03, 0.05, 0.08, 0.12],
@@ -89,31 +89,31 @@ def optimiser_xgboost(X, y, groupes, n_iter: int = 12):
         "min_child_weight": [1, 5, 10, 20],
         "reg_lambda": [1, 5, 10],
     }
-    recherche = RandomizedSearchCV(
-        XGBClassifier(tree_method="hist", eval_metric="logloss", n_jobs=4, random_state=GRAINE),
-        grille, n_iter=n_iter, scoring="average_precision", cv=GroupKFold(n_splits=3),
-        random_state=GRAINE, n_jobs=1, refit=False,
+    search = RandomizedSearchCV(
+        XGBClassifier(tree_method="hist", eval_metric="logloss", n_jobs=4, random_state=SEED),
+        grid, n_iter=n_iter, scoring="average_precision", cv=GroupKFold(n_splits=3),
+        random_state=SEED, n_jobs=1, refit=False,
     )
-    recherche.fit(X, y, groups=groupes)
-    resultats = (pd.DataFrame(recherche.cv_results_)
-                 .sort_values("rank_test_score")[["rank_test_score", "mean_test_score", "std_test_score", "params"]])
-    return recherche.best_params_, resultats
+    search.fit(X, y, groups=groups)
+    results = (pd.DataFrame(search.cv_results_)
+               .sort_values("rank_test_score")[["rank_test_score", "mean_test_score", "std_test_score", "params"]])
+    return search.best_params_, results
 
 
 # --------------------------------------------------------------------------
-# Évaluation
+# Evaluation
 # --------------------------------------------------------------------------
-def seuil_f1(y, proba) -> float:
-    """Seuil de décision qui maximise le F1 (à calculer sur la VALIDATION, jamais sur le test)."""
-    precision, recall, seuils = precision_recall_curve(y, proba)
+def f1_threshold(y, proba) -> float:
+    """Decision threshold that maximises F1 (to be computed on VALIDATION, never on the test set)."""
+    precision, recall, thresholds = precision_recall_curve(y, proba)
     f1 = 2 * precision[:-1] * recall[:-1] / np.clip(precision[:-1] + recall[:-1], 1e-12, None)
-    return float(seuils[int(np.argmax(f1))])
+    return float(thresholds[int(np.argmax(f1))])
 
 
-def evaluer(y, proba, seuil: float = 0.5) -> dict:
-    """Toutes les métriques demandées, pour un seuil de décision donné."""
-    prediction = (np.asarray(proba) >= seuil).astype(int)
-    vn, fp, fn, vp = confusion_matrix(y, prediction).ravel()
+def evaluate(y, proba, threshold: float = 0.5) -> dict:
+    """All the requested metrics, for a given decision threshold."""
+    prediction = (np.asarray(proba) >= threshold).astype(int)
+    tn, fp, fn, tp = confusion_matrix(y, prediction).ravel()
     return {
         "ROC-AUC": roc_auc_score(y, proba) if len(np.unique(proba)) > 1 else 0.5,
         "PR-AUC": average_precision_score(y, proba),
@@ -122,47 +122,47 @@ def evaluer(y, proba, seuil: float = 0.5) -> dict:
         "F1": f1_score(y, prediction),
         "Accuracy": accuracy_score(y, prediction),
         "Brier": brier_score_loss(y, proba),
-        "Seuil": seuil,
-        "VP": int(vp), "FP": int(fp), "FN": int(fn), "VN": int(vn),
+        "Threshold": threshold,
+        "TP": int(tp), "FP": int(fp), "FN": int(fn), "TN": int(tn),
     }
 
 
-def gains(y, proba, parts=(0.05, 0.10, 0.20, 0.30, 0.50)) -> pd.DataFrame:
-    """Courbe de gains : en ciblant les x % de clients les mieux scorés, quelle part des départs capte-t-on ?"""
-    ordre = np.argsort(-np.asarray(proba))
-    y_trie = np.asarray(y)[ordre]
-    total = y_trie.sum()
-    lignes = []
-    for part in parts:
-        n = int(round(part * len(y_trie)))
-        captes = y_trie[:n].sum()
-        lignes.append({"Clients ciblés": part, "Départs captés": captes / total,
-                       "Taux de churn dans la cible": captes / n, "Lift": (captes / n) / (total / len(y_trie))})
-    return pd.DataFrame(lignes)
+def gains(y, proba, shares=(0.05, 0.10, 0.20, 0.30, 0.50)) -> pd.DataFrame:
+    """Gains curve: by targeting the x% best-scored customers, what share of the departures is captured?"""
+    order = np.argsort(-np.asarray(proba))
+    y_sorted = np.asarray(y)[order]
+    total = y_sorted.sum()
+    rows = []
+    for share in shares:
+        k = int(round(share * len(y_sorted)))
+        captured = y_sorted[:k].sum()
+        rows.append({"Customers targeted": share, "Departures captured": captured / total,
+                     "Churn rate in the target": captured / k, "Lift": (captured / k) / (total / len(y_sorted))})
+    return pd.DataFrame(rows)
 
 
 # --------------------------------------------------------------------------
-# Contrôle de la fuite de cible
+# Target leakage check
 # --------------------------------------------------------------------------
-def audit_fuite(table: pd.DataFrame, cible: str, colonnes: list[str]) -> pd.DataFrame:
-    """Pour chaque colonne : le simple fait qu'elle soit vide permet-il de deviner la cible ?
+def leakage_audit(table: pd.DataFrame, target: str, columns: list[str]) -> pd.DataFrame:
+    """For each column: is the mere fact that it is blank enough to guess the target?
 
-    ``AUC du vide`` = AUC obtenue en prédisant la cible avec le seul indicateur « valeur manquante ».
-    0,5 : le vide n'apprend rien. Proche de 1 : le vide trahit la cible.
+    ``Blank AUC`` = AUC obtained by predicting the target with the single "value is missing" flag.
+    0.5: the blank teaches nothing. Close to 1: the blank gives the target away.
     """
-    y = table[cible].to_numpy()
-    lignes = []
-    for col in colonnes:
-        vide = table[col].isna().to_numpy().astype(int)
-        auc = roc_auc_score(y, vide) if 0 < vide.sum() < len(vide) else 0.5
-        lignes.append({
+    y = table[target].to_numpy()
+    rows = []
+    for col in columns:
+        blank = table[col].isna().to_numpy().astype(int)
+        auc = roc_auc_score(y, blank) if 0 < blank.sum() < len(blank) else 0.5
+        rows.append({
             "Variable": col,
-            "% vide si actif": round(100 * vide[y == 0].mean(), 1),
-            "% vide si clos": round(100 * vide[y == 1].mean(), 1),
-            "AUC du vide": round(max(auc, 1 - auc), 3),
+            "% blank if active": round(100 * blank[y == 0].mean(), 1),
+            "% blank if closed": round(100 * blank[y == 1].mean(), 1),
+            "Blank AUC": round(max(auc, 1 - auc), 3),
         })
-    audit = pd.DataFrame(lignes).set_index("Variable")
+    audit = pd.DataFrame(rows).set_index("Variable")
     audit["Verdict"] = np.select(
-        [audit["AUC du vide"] >= 0.80, audit["AUC du vide"] >= 0.60],
-        ["FUITE — exclue", "À surveiller"], default="Saine")
-    return audit.sort_values("AUC du vide", ascending=False)
+        [audit["Blank AUC"] >= 0.80, audit["Blank AUC"] >= 0.60],
+        ["LEAK — excluded", "To watch"], default="Sound")
+    return audit.sort_values("Blank AUC", ascending=False)

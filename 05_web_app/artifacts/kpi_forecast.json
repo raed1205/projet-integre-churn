@@ -1,8 +1,8 @@
 {
- "kpi": "Nombre hebdomadaire de clôtures de comptes",
- "note_dates": "Dates décalées par l'anonymisation : lire des durées et des évolutions, pas un calendrier réel.",
- "historique": {
-  "semaines": [
+ "kpi": "Weekly number of account closures",
+ "date_note": "Dates shifted by the anonymisation: read durations and trends, not a real calendar.",
+ "history": {
+  "weeks": [
    "2020-04-13",
    "2020-04-20",
    "2020-04-27",
@@ -206,7 +206,7 @@
    "2024-02-12",
    "2024-02-19"
   ],
-  "brute": [
+  "raw": [
    9,
    51,
    53,
@@ -410,7 +410,7 @@
    272,
    388
   ],
-  "corrigee": [
+  "corrected": [
    9,
    51,
    53,
@@ -614,7 +614,7 @@
    272,
    388
   ],
-  "semaines_de_masse": [
+  "mass_weeks": [
    "2020-09-21",
    "2021-04-12",
    "2021-11-01",
@@ -622,17 +622,17 @@
    "2022-11-07"
   ]
  },
- "decoupage": {
-  "semaines": 202,
+ "split": {
+  "weeks": 202,
   "train": 142,
   "validation": 20,
   "test": 40,
-  "fenetre": 8,
-  "debut_test": "2023-05-22",
-  "fin_test": "2024-02-19"
+  "window": 8,
+  "test_start": "2023-05-22",
+  "test_end": "2024-02-19"
  },
  "test": {
-  "semaines": [
+  "weeks": [
    "2023-05-22",
    "2023-05-29",
    "2023-06-05",
@@ -674,7 +674,7 @@
    "2024-02-12",
    "2024-02-19"
   ],
-  "reel": [
+  "actual": [
    11,
    5,
    342,
@@ -716,8 +716,8 @@
    272,
    388
   ],
-  "previsions": {
-   "Naïve (dernière valeur)": [
+  "forecasts": {
+   "Naive (last value)": [
     2694.0,
     11.0,
     5.0,
@@ -759,7 +759,7 @@
     493.0,
     272.0
    ],
-   "Moyenne mobile 4 semaines": [
+   "4-week moving average": [
     678.5,
     681.0,
     680.5,
@@ -801,7 +801,7 @@
     859.0,
     828.5
    ],
-   "Médiane mobile 8 semaines": [
+   "8-week moving median": [
     8.5,
     9.5,
     9.0,
@@ -927,7 +927,7 @@
     385.8,
     293.5
    ],
-   "RNN simple": [
+   "Simple RNN": [
     12.5,
     8.4,
     5.8,
@@ -971,8 +971,8 @@
    ]
   }
  },
- "futur": {
-  "semaines": [
+ "future": {
+  "weeks": [
    "2024-02-26",
    "2024-03-04",
    "2024-03-11",
@@ -982,7 +982,7 @@
    "2024-04-08",
    "2024-04-15"
   ],
-  "prevision": [
+  "forecast": [
    276.0,
    245.3,
    223.0,
@@ -992,7 +992,7 @@
    169.6,
    161.5
   ],
-  "bas": [
+  "low": [
    192.7,
    171.2,
    155.6,
@@ -1002,7 +1002,7 @@
    118.2,
    112.6
   ],
-  "haut": [
+  "high": [
    1468.3,
    1305.5,
    1187.2,
@@ -1013,90 +1013,90 @@
    861.0
   ]
  },
- "comparaison": [
+ "comparison": [
   {
-   "Modèle": "Naïve (dernière valeur)",
-   "Type": "Référence",
+   "Model": "Naive (last value)",
+   "Type": "Reference",
    "MAE": 478.3,
    "RMSE": 859.478126539588
   },
   {
-   "Modèle": "Moyenne mobile 4 semaines",
-   "Type": "Référence",
+   "Model": "4-week moving average",
+   "Type": "Reference",
    "MAE": 373.03125,
    "RMSE": 575.3383175901811
   },
   {
-   "Modèle": "Médiane mobile 8 semaines",
-   "Type": "Référence",
+   "Model": "8-week moving median",
+   "Type": "Reference",
    "MAE": 272.4,
    "RMSE": 549.7668824147195
   },
   {
-   "Modèle": "ARIMA(2, 1, 2)",
-   "Type": "Référence",
+   "Model": "ARIMA(2, 1, 2)",
+   "Type": "Reference",
    "MAE": 334.7088599433694,
    "RMSE": 576.710180785083
   },
   {
-   "Modèle": "LSTM",
+   "Model": "LSTM",
    "Type": "Deep Learning",
    "MAE": 287.1853593636096,
    "RMSE": 577.2497439880215,
-   "MAE écart-type": 6.423401053861104,
-   "RMSE écart-type": 7.595838525103753
+   "MAE std": 6.423401053861104,
+   "RMSE std": 7.595838525103753
   },
   {
-   "Modèle": "RNN simple",
+   "Model": "Simple RNN",
    "Type": "Deep Learning",
    "MAE": 323.60463708263177,
    "RMSE": 607.6513955472817,
-   "MAE écart-type": 9.285312142723768,
-   "RMSE écart-type": 3.408450078754484
+   "MAE std": 9.285312142723768,
+   "RMSE std": 3.408450078754484
   }
  ],
  "second_kpi": {
-  "nom": "Clients perdus par semaine",
-  "comparaison": [
+  "name": "Customers lost per week",
+  "comparison": [
    {
-    "Modèle": "Naïve (dernière valeur)",
-    "Type": "Référence",
+    "Model": "Naive (last value)",
+    "Type": "Reference",
     "MAE": 227.2,
     "RMSE": 459.46827964506974
    },
    {
-    "Modèle": "Moyenne mobile 4 semaines",
-    "Type": "Référence",
+    "Model": "4-week moving average",
+    "Type": "Reference",
     "MAE": 196.41875,
     "RMSE": 275.97957635031617
    },
    {
-    "Modèle": "Médiane mobile 8 semaines",
-    "Type": "Référence",
+    "Model": "8-week moving median",
+    "Type": "Reference",
     "MAE": 133.3,
     "RMSE": 216.3661537764167
    },
    {
-    "Modèle": "ARIMA(2, 1, 2)",
-    "Type": "Référence",
+    "Model": "ARIMA(2, 1, 2)",
+    "Type": "Reference",
     "MAE": 159.8836744373919,
     "RMSE": 248.945217705191
    },
    {
-    "Modèle": "LSTM",
+    "Model": "LSTM",
     "Type": "Deep Learning",
     "MAE": 124.50102493605374,
     "RMSE": 220.18357455402028,
-    "MAE écart-type": 1.0285304845299013,
-    "RMSE écart-type": 4.437390559238855
+    "MAE std": 1.0285304845299013,
+    "RMSE std": 4.437390559238855
    },
    {
-    "Modèle": "RNN simple",
+    "Model": "Simple RNN",
     "Type": "Deep Learning",
     "MAE": 143.63011559149803,
     "RMSE": 232.84361738503807,
-    "MAE écart-type": 4.553787035321952,
-    "RMSE écart-type": 6.434062654690869
+    "MAE std": 4.553787035321952,
+    "RMSE std": 6.434062654690869
    }
   ]
  }

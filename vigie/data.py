@@ -172,3 +172,61 @@ def age_band(birth_period: pd.Series, ref_year: int) -> pd.Series:
 def tenure_band(years: pd.Series) -> pd.Series:
     return (pd.cut(years, bins=[-0.01, 2, 5, 10, 15, 100], labels=TENURE_BANDS)
             .astype("object").fillna(NOT_PROVIDED))
+
+
+# --------------------------------------------------------------------------
+# Display labels
+# --------------------------------------------------------------------------
+# The reference files and some codes carry French labels. They are kept untouched in the
+# warehouse (they are source data); this dictionary gives the English wording used by the
+# application, the dashboards and the report.
+ENGLISH_LABELS = {
+    # account families (ACCOUNT_CATEGORY.xlsx)
+    "Autres comptes": "Other accounts", "Coffres": "Safe-deposit boxes", "Comptes courants": "Current accounts",
+    "Comptes en devises": "Foreign-currency accounts", "Comptes indisponibles": "Blocked accounts",
+    "Contentieux": "Litigation", "Credit automobile": "Car loans", "Credit consommation": "Consumer credit",
+    "Credit immobilier": "Mortgages", "Credit investissement": "Investment loans", "Epargne": "Savings",
+    "Exigibles": "Demand deposits", "Financement court terme": "Short-term financing",
+    "Placements a terme": "Term deposits",
+    # closure reasons (CLOSURE_REASON.xlsx)
+    "Autre": "Other", "Cessation d'activite": "Business closure", "Changement d'adresse": "Change of address",
+    "Changement d'employeur": "Change of employer", "Deces": "Death", "Delais de traitement": "Processing delays",
+    "Offre concurrente": "Competing offer", "Qualite de service": "Quality of service",
+    "Reclamation non traitee": "Unresolved complaint", "Refus de credit": "Loan refusal",
+    "Tarification": "Pricing", "Transfert interne": "Internal transfer",
+    # currencies (CURRENCY.xlsx)
+    "Monnaie locale": "Local currency", "Monnaie locale convertible": "Convertible local currency",
+    "Euro": "Euro", "Dollar americain": "US dollar", "Autres devises": "Other currencies",
+    # industry sections (INDUSTRY.xlsx)
+    "Agriculture, sylviculture et peche": "Agriculture, forestry and fishing",
+    "Industries extractives": "Mining and quarrying", "Industrie manufacturiere": "Manufacturing",
+    "Energie": "Energy", "Eau et dechets": "Water and waste", "Construction": "Construction",
+    "Commerce": "Trade", "Transports et entreposage": "Transport and storage",
+    "Hebergement et restauration": "Accommodation and food services",
+    "Information et communication": "Information and communication",
+    "Activites financieres et assurance": "Finance and insurance", "Activites immobilieres": "Real estate",
+    "Activites specialisees et scientifiques": "Professional and scientific activities",
+    "Services administratifs et de soutien": "Administrative and support services",
+    "Administration publique": "Public administration", "Enseignement": "Education",
+    "Sante et action sociale": "Health and social work", "Arts et loisirs": "Arts and recreation",
+    "Autres services": "Other services", "Activites des menages": "Household activities",
+    "Organismes extraterritoriaux": "Extraterritorial organisations",
+    "Non renseigne ou autre": "Not provided or other",
+    # product groups (codes of the main file)
+    "EPARGNE": "Savings", "COMPTE_COURANT": "Current account", "CREDIT_IMMOBILIER": "Mortgage",
+    "CREDIT_CONSO": "Consumer credit", "PLACEMENT": "Term deposit", "DEPOT_VUE": "Demand deposit",
+    "FINANCEMENT_COURT_TERME": "Short-term financing", "CREDIT_INVESTISSEMENT": "Investment loan",
+    "INDISPONIBLE": "Blocked", "COMPTE_DEVISES": "Foreign-currency account", "CREDIT_AUTO": "Car loan",
+    "COFFRE": "Safe-deposit box",
+    # zones (codes of the main file)
+    "LOCAL": "Local", "EUROPE": "Europe", "AFRIQUE_MO": "Africa / Middle East", "AMERIQUES": "Americas",
+    "ASIE_OCEANIE": "Asia / Oceania", "AUTRE": "Other",
+}
+MARITAL_STATUS_LABELS = {"C": "Single", "M": "Married", "D": "Divorced", "V": "Widowed"}
+CUSTOMER_TYPE_LABELS = {"PPH": "Individual", "PM": "Legal entity", "PRO": "Professional",
+                        "TRPP": "Other (TRPP)", "TRPM": "Other (TRPM)"}
+
+
+def english(label) -> str:
+    """English wording of a source label (unknown labels are returned unchanged)."""
+    return ENGLISH_LABELS.get(label, label)
