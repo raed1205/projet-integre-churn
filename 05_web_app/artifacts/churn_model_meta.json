@@ -1,0 +1,414 @@
+{
+ "model": "XGBoost (gradient boosting of decision trees)",
+ "grain": "customer",
+ "target": "all of the customer's accounts are closed",
+ "reference_date": "2024-02-19",
+ "source_sha256": "858551b4293ee1abce4d3aaeac3dea07d817cfd80e111dd52dcff5b06d9fb732",
+ "training": {
+  "train_customers": 223328,
+  "validation_customers": 47856,
+  "test_customers": 47856,
+  "split": "GroupShuffleSplit per CUSTOMER_NO (70 / 15 / 15)",
+  "seed": 42,
+  "hyperparameters": {
+   "subsample": 0.9,
+   "reg_lambda": 1,
+   "n_estimators": 300,
+   "min_child_weight": 1,
+   "max_depth": 7,
+   "learning_rate": 0.05,
+   "colsample_bytree": 0.8
+  }
+ },
+ "columns": [
+  "AGE",
+  "CUSTOMER_TENURE",
+  "N_ACCOUNTS",
+  "SALARY",
+  "FILE_COMPLETE",
+  "MONTHS_SINCE_REVIEW",
+  "MONTHS_TO_NEXT_REVIEW",
+  "MARITAL_STATUS=C",
+  "MARITAL_STATUS=M",
+  "MARITAL_STATUS=D",
+  "MARITAL_STATUS=V",
+  "MARITAL_STATUS=NR",
+  "CUSTOMER_TYPE=PPH",
+  "CUSTOMER_TYPE=PM",
+  "CUSTOMER_TYPE=PRO",
+  "CUSTOMER_TYPE=OTHER",
+  "SEGMENT=Retail",
+  "SEGMENT=Premium",
+  "SEGMENT=Corporate Small",
+  "SEGMENT=Corporate",
+  "KYC_SCORE=LR",
+  "KYC_SCORE=MR",
+  "KYC_SCORE=H1",
+  "KYC_SCORE=H2",
+  "KYC_SCORE=H3",
+  "KYC_SCORE=NR",
+  "RESIDENCE_ZONE=LOCAL",
+  "RESIDENCE_ZONE=EUROPE",
+  "RESIDENCE_ZONE=AFRIQUE_MO",
+  "RESIDENCE_ZONE=AMERIQUES",
+  "RESIDENCE_ZONE=OTHER"
+ ],
+ "base_rate": 0.3673,
+ "shap_base_value": -0.54739,
+ "alert_threshold": 0.3182,
+ "test_metrics": {
+  "ROC-AUC": 0.7508,
+  "PR-AUC": 0.6113,
+  "Precision": 0.5264,
+  "Recall": 0.7901,
+  "F1": 0.6318,
+  "Accuracy": 0.6607,
+  "Brier": 0.1915,
+  "Threshold": 0.3182,
+  "TP": 13935,
+  "FP": 12536,
+  "FN": 3703,
+  "TN": 17682
+ },
+ "model_comparison": {
+  "Baseline (average rate)": {
+   "ROC-AUC": 0.5,
+   "PR-AUC": 0.3686,
+   "Precision": 0.0,
+   "Recall": 0.0,
+   "F1": 0.0,
+   "Accuracy": 0.6314,
+   "Brier": 0.2327,
+   "Threshold": 0.5
+  },
+  "Logistic regression": {
+   "ROC-AUC": 0.6859,
+   "PR-AUC": 0.5375,
+   "Precision": 0.5177,
+   "Recall": 0.6755,
+   "F1": 0.5862,
+   "Accuracy": 0.6485,
+   "Brier": 0.2093,
+   "Threshold": 0.3388
+  },
+  "Random Forest": {
+   "ROC-AUC": 0.748,
+   "PR-AUC": 0.607,
+   "Precision": 0.5148,
+   "Recall": 0.8132,
+   "F1": 0.6305,
+   "Accuracy": 0.6486,
+   "Brier": 0.1926,
+   "Threshold": 0.2989
+  },
+  "XGBoost": {
+   "ROC-AUC": 0.7507,
+   "PR-AUC": 0.6112,
+   "Precision": 0.5182,
+   "Recall": 0.8068,
+   "F1": 0.6311,
+   "Accuracy": 0.6524,
+   "Brier": 0.1916,
+   "Threshold": 0.2982
+  },
+  "Tuned XGBoost (kept)": {
+   "ROC-AUC": 0.7508,
+   "PR-AUC": 0.6113,
+   "Precision": 0.5264,
+   "Recall": 0.7901,
+   "F1": 0.6318,
+   "Accuracy": 0.6607,
+   "Brier": 0.1915,
+   "Threshold": 0.3182
+  }
+ },
+ "importance": {
+  "Months to next review": 0.3417,
+  "Months since last review": 0.1849,
+  "Customer tenure (years)": 0.1181,
+  "Age": 0.1098,
+  "Number of accounts": 0.0547,
+  "KYC score": 0.0485,
+  "Complete file": 0.0429,
+  "Declared income": 0.0303,
+  "Marital status": 0.0257,
+  "Commercial segment": 0.0157,
+  "Customer type": 0.0154,
+  "Residence zone": 0.0124
+ },
+ "risk_levels": [
+  {
+   "level": "Low (< 25%)",
+   "test_customers": 17707,
+   "observed_rate": 0.15
+  },
+  {
+   "level": "Moderate (25–50%)",
+   "test_customers": 14647,
+   "observed_rate": 0.3788
+  },
+  {
+   "level": "High (≥ 50%)",
+   "test_customers": 15502,
+   "observed_rate": 0.6085
+  }
+ ],
+ "score_to_observed_rate": [
+  {
+   "from": 0.0,
+   "to": 0.1,
+   "test_customers": 3871,
+   "observed_rate": 0.0734
+  },
+  {
+   "from": 0.1,
+   "to": 0.2,
+   "test_customers": 9422,
+   "observed_rate": 0.1455
+  },
+  {
+   "from": 0.2,
+   "to": 0.3,
+   "test_customers": 7176,
+   "observed_rate": 0.2448
+  },
+  {
+   "from": 0.3,
+   "to": 0.4,
+   "test_customers": 5956,
+   "observed_rate": 0.3497
+  },
+  {
+   "from": 0.4,
+   "to": 0.5,
+   "test_customers": 5929,
+   "observed_rate": 0.4571
+  },
+  {
+   "from": 0.5,
+   "to": 0.6,
+   "test_customers": 8383,
+   "observed_rate": 0.5533
+  },
+  {
+   "from": 0.6,
+   "to": 0.7,
+   "test_customers": 4410,
+   "observed_rate": 0.634
+  },
+  {
+   "from": 0.7,
+   "to": 0.8,
+   "test_customers": 2550,
+   "observed_rate": 0.7333
+  },
+  {
+   "from": 0.8,
+   "to": 1.0,
+   "test_customers": 159,
+   "observed_rate": 0.8113
+  }
+ ],
+ "gains": [
+  {
+   "Customers targeted": 0.05,
+   "Departures captured": 0.1002,
+   "Churn rate in the target": 0.7388,
+   "Lift": 2.0046
+  },
+  {
+   "Customers targeted": 0.1,
+   "Departures captured": 0.1902,
+   "Churn rate in the target": 0.701,
+   "Lift": 1.902
+  },
+  {
+   "Customers targeted": 0.2,
+   "Departures captured": 0.3543,
+   "Churn rate in the target": 0.6529,
+   "Lift": 1.7715
+  },
+  {
+   "Customers targeted": 0.3,
+   "Departures captured": 0.5005,
+   "Churn rate in the target": 0.6149,
+   "Lift": 1.6683
+  },
+  {
+   "Customers targeted": 0.5,
+   "Departures captured": 0.7437,
+   "Churn rate in the target": 0.5482,
+   "Lift": 1.4874
+  }
+ ],
+ "marginals": {
+  "numeric": {
+   "AGE": {
+    "type": "continuous",
+    "missing_share": 0.0628,
+    "deciles": [
+     2.0,
+     27.0,
+     32.0,
+     37.0,
+     42.0,
+     47.0,
+     52.0,
+     57.0,
+     62.0,
+     72.0,
+     87.0
+    ]
+   },
+   "CUSTOMER_TENURE": {
+    "type": "continuous",
+    "missing_share": 0.0058,
+    "deciles": [
+     0.13,
+     4.13,
+     5.39,
+     7.64,
+     9.13,
+     11.13,
+     14.13,
+     16.13,
+     19.13,
+     21.39,
+     24.13
+    ]
+   },
+   "N_ACCOUNTS": {
+    "type": "discrete",
+    "missing_share": 0.0,
+    "values": [
+     1.0,
+     2.0,
+     3.0,
+     5.0,
+     4.0
+    ],
+    "frequencies": [
+     0.85749,
+     0.08522,
+     0.02703,
+     0.01669,
+     0.01357
+    ]
+   },
+   "SALARY": {
+    "type": "discrete",
+    "missing_share": 0.673,
+    "values": [
+     400.0,
+     2000.0,
+     600.0,
+     1000.0,
+     800.0,
+     3000.0,
+     4000.0,
+     700.0,
+     500.0,
+     900.0,
+     5000.0,
+     1.0
+    ],
+    "frequencies": [
+     0.5304,
+     0.15097,
+     0.14164,
+     0.14031,
+     0.01089,
+     0.00753,
+     0.00544,
+     0.004,
+     0.00359,
+     0.0029,
+     0.00217,
+     0.00015
+    ]
+   },
+   "FILE_COMPLETE": {
+    "type": "discrete",
+    "missing_share": 0.0,
+    "values": [
+     0.0,
+     1.0
+    ],
+    "frequencies": [
+     0.52749,
+     0.47251
+    ]
+   },
+   "MONTHS_SINCE_REVIEW": {
+    "type": "continuous",
+    "missing_share": 0.0001,
+    "deciles": [
+     0.59,
+     5.62,
+     16.62,
+     26.61,
+     37.59,
+     43.63,
+     56.64,
+     65.61,
+     69.65,
+     88.61,
+     256.62
+    ]
+   },
+   "MONTHS_TO_NEXT_REVIEW": {
+    "type": "continuous",
+    "missing_share": 0.0002,
+    "deciles": [
+     -232.61,
+     -45.63,
+     -24.57,
+     -20.63,
+     -12.58,
+     -1.61,
+     7.39,
+     17.38,
+     30.39,
+     42.38,
+     58.41
+    ]
+   }
+  },
+  "categorical": {
+   "MARITAL_STATUS": {
+    "C": 0.45599,
+    "M": 0.44799,
+    "NR": 0.05864,
+    "V": 0.02296,
+    "D": 0.01442
+   },
+   "CUSTOMER_TYPE": {
+    "PPH": 0.90628,
+    "PM": 0.0579,
+    "PRO": 0.03581,
+    "OTHER": 1e-05
+   },
+   "SEGMENT": {
+    "Retail": 0.91095,
+    "Corporate Small": 0.07277,
+    "Corporate": 0.00971,
+    "Premium": 0.00658
+   },
+   "KYC_SCORE": {
+    "LR": 0.8033,
+    "MR": 0.0992,
+    "H1": 0.05382,
+    "H2": 0.0307,
+    "H3": 0.01285,
+    "NR": 0.00013
+   },
+   "RESIDENCE_ZONE": {
+    "LOCAL": 0.95276,
+    "EUROPE": 0.02603,
+    "AFRIQUE_MO": 0.01956,
+    "AMERIQUES": 0.00116,
+    "OTHER": 0.0005
+   }
+  }
+ }
+}

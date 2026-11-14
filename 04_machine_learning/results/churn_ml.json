@@ -1,0 +1,477 @@
+{
+ "source_sha256": "858551b4293ee1abce4d3aaeac3dea07d817cfd80e111dd52dcff5b06d9fb732",
+ "model_comparison": {
+  "Baseline (average rate)": {
+   "ROC-AUC": 0.5,
+   "PR-AUC": 0.3686,
+   "Precision": 0.0,
+   "Recall": 0.0,
+   "F1": 0.0,
+   "Accuracy": 0.6314,
+   "Brier": 0.2327,
+   "Threshold": 0.5
+  },
+  "Logistic regression": {
+   "ROC-AUC": 0.6859,
+   "PR-AUC": 0.5375,
+   "Precision": 0.5177,
+   "Recall": 0.6755,
+   "F1": 0.5862,
+   "Accuracy": 0.6485,
+   "Brier": 0.2093,
+   "Threshold": 0.3388
+  },
+  "Random Forest": {
+   "ROC-AUC": 0.748,
+   "PR-AUC": 0.607,
+   "Precision": 0.5148,
+   "Recall": 0.8132,
+   "F1": 0.6305,
+   "Accuracy": 0.6486,
+   "Brier": 0.1926,
+   "Threshold": 0.2989
+  },
+  "XGBoost": {
+   "ROC-AUC": 0.7507,
+   "PR-AUC": 0.6112,
+   "Precision": 0.5182,
+   "Recall": 0.8068,
+   "F1": 0.6311,
+   "Accuracy": 0.6524,
+   "Brier": 0.1916,
+   "Threshold": 0.2982
+  },
+  "Tuned XGBoost (kept)": {
+   "ROC-AUC": 0.7508,
+   "PR-AUC": 0.6113,
+   "Precision": 0.5264,
+   "Recall": 0.7901,
+   "F1": 0.6318,
+   "Accuracy": 0.6607,
+   "Brier": 0.1915,
+   "Threshold": 0.3182
+  }
+ },
+ "confusion_matrices": {
+  "Baseline (average rate)": {
+   "TP": 0,
+   "FP": 0,
+   "FN": 17638,
+   "TN": 30218
+  },
+  "Logistic regression": {
+   "TP": 11914,
+   "FP": 11098,
+   "FN": 5724,
+   "TN": 19120
+  },
+  "Random Forest": {
+   "TP": 14344,
+   "FP": 13521,
+   "FN": 3294,
+   "TN": 16697
+  },
+  "XGBoost": {
+   "TP": 14230,
+   "FP": 13228,
+   "FN": 3408,
+   "TN": 16990
+  },
+  "Tuned XGBoost (kept)": {
+   "TP": 13935,
+   "FP": 12536,
+   "FN": 3703,
+   "TN": 17682
+  }
+ },
+ "hyperparameters": {
+  "subsample": 0.9,
+  "reg_lambda": 1,
+  "n_estimators": 300,
+  "min_child_weight": 1,
+  "max_depth": 7,
+  "learning_rate": 0.05,
+  "colsample_bytree": 0.8
+ },
+ "roc_auc_stability": {
+  "Training": 0.7679,
+  "Validation": 0.7518,
+  "Test": 0.7508
+ },
+ "sensitivity": {
+  "Model kept (12 features)": {
+   "Columns": 31.0,
+   "ROC-AUC": 0.7508,
+   "PR-AUC": 0.6113,
+   "ROC-AUC gap": 0.0
+  },
+  "+ industry and branch group (14 features)": {
+   "Columns": 65.0,
+   "ROC-AUC": 0.7563,
+   "PR-AUC": 0.6253,
+   "ROC-AUC gap": 0.0054
+  },
+  "Without the two review features": {
+   "Columns": 29.0,
+   "ROC-AUC": 0.7302,
+   "PR-AUC": 0.5934,
+   "ROC-AUC gap": -0.0207
+  },
+  "Without the Compliance family": {
+   "Columns": 22.0,
+   "ROC-AUC": 0.6603,
+   "PR-AUC": 0.5054,
+   "ROC-AUC gap": -0.0905
+  },
+  "Compliance only": {
+   "Columns": 9.0,
+   "ROC-AUC": 0.7156,
+   "PR-AUC": 0.5727,
+   "ROC-AUC gap": -0.0352
+  },
+  "Relationship only": {
+   "Columns": 11.0,
+   "ROC-AUC": 0.628,
+   "PR-AUC": 0.4702,
+   "ROC-AUC gap": -0.1228
+  },
+  "Demographics only": {
+   "Columns": 11.0,
+   "ROC-AUC": 0.5812,
+   "PR-AUC": 0.4263,
+   "ROC-AUC gap": -0.1696
+  }
+ },
+ "leakage_demonstration": {
+  "Model WITH leaking features": 0.9511,
+  "Model WITHOUT leaking features (kept)": 0.7507
+ },
+ "leakage_audit": [
+  {
+   "Variable": "ACCT_CLOSE_DATE",
+   "% blank if active": 100.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 1.0,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "CLOSURE_REASON",
+   "% blank if active": 100.0,
+   "% blank if closed": 9.1,
+   "Blank AUC": 0.954,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "CURRENCY",
+   "% blank if active": 0.0,
+   "% blank if closed": 67.8,
+   "Blank AUC": 0.839,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "ACCOUNT_CATEGORY",
+   "% blank if active": 0.0,
+   "% blank if closed": 67.8,
+   "Blank AUC": 0.839,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "ACCT_OPENING_DATE",
+   "% blank if active": 0.0,
+   "% blank if closed": 67.8,
+   "Blank AUC": 0.839,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "ACCOUNT_TYPE_DESC",
+   "% blank if active": 0.0,
+   "% blank if closed": 67.8,
+   "Blank AUC": 0.839,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "ACCT_BALANCE",
+   "% blank if active": 0.0,
+   "% blank if closed": 67.8,
+   "Blank AUC": 0.839,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "AMOUNT",
+   "% blank if active": 15.0,
+   "% blank if closed": 77.7,
+   "Blank AUC": 0.813,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "PRODUCT_LINE",
+   "% blank if active": 14.7,
+   "% blank if closed": 76.0,
+   "Blank AUC": 0.806,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "PRODUCT_GROUP",
+   "% blank if active": 14.7,
+   "% blank if closed": 76.0,
+   "Blank AUC": 0.806,
+   "Verdict": "LEAK — excluded"
+  },
+  {
+   "Variable": "COMPLETED_FILE",
+   "% blank if active": 41.0,
+   "% blank if closed": 62.5,
+   "Blank AUC": 0.608,
+   "Verdict": "To watch"
+  },
+  {
+   "Variable": "FIXEDRATE",
+   "% blank if active": 89.1,
+   "% blank if closed": 91.9,
+   "Blank AUC": 0.514,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "BIRTH_PERIOD",
+   "% blank if active": 12.6,
+   "% blank if closed": 10.6,
+   "Blank AUC": 0.51,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "MARITAL_STATUS",
+   "% blank if active": 12.1,
+   "% blank if closed": 10.3,
+   "Blank AUC": 0.509,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "SALARY",
+   "% blank if active": 68.2,
+   "% blank if closed": 69.8,
+   "Blank AUC": 0.508,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "MATURITYDATE",
+   "% blank if active": 92.0,
+   "% blank if closed": 93.4,
+   "Blank AUC": 0.507,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "STARTDATE",
+   "% blank if active": 89.1,
+   "% blank if closed": 90.4,
+   "Blank AUC": 0.507,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "PRODUCT_STATUS",
+   "% blank if active": 89.1,
+   "% blank if closed": 90.4,
+   "Blank AUC": 0.507,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "CUST_OPENING_DATE",
+   "% blank if active": 0.6,
+   "% blank if closed": 0.7,
+   "Blank AUC": 0.501,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "NATIONALITY_REGION",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "RESIDENCE_REGION",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "LAST_REVIEW_DATE",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "NEXT__REVIEW_DATE",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "BRANCH_GROUP",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "SCORE_KYC",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "NATURE_CLIENT",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "INDUSTRY",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "PARTYCLASS",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  },
+  {
+   "Variable": "LOB",
+   "% blank if active": 0.0,
+   "% blank if closed": 0.0,
+   "Blank AUC": 0.5,
+   "Verdict": "Sound"
+  }
+ ],
+ "importance": [
+  {
+   "Feature": "Months to next review",
+   "Gain (share)": 0.2002,
+   "Mean absolute SHAP": 0.483599990606308,
+   "SHAP (share)": 0.3416999876499176
+  },
+  {
+   "Feature": "Months since last review",
+   "Gain (share)": 0.3997,
+   "Mean absolute SHAP": 0.26159998774528503,
+   "SHAP (share)": 0.18490000069141388
+  },
+  {
+   "Feature": "Customer tenure (years)",
+   "Gain (share)": 0.1004,
+   "Mean absolute SHAP": 0.1670999974012375,
+   "SHAP (share)": 0.11810000240802765
+  },
+  {
+   "Feature": "Age",
+   "Gain (share)": 0.1153,
+   "Mean absolute SHAP": 0.15539999306201935,
+   "SHAP (share)": 0.10980000346899033
+  },
+  {
+   "Feature": "Number of accounts",
+   "Gain (share)": 0.0716,
+   "Mean absolute SHAP": 0.07739999890327454,
+   "SHAP (share)": 0.05469999834895134
+  },
+  {
+   "Feature": "KYC score",
+   "Gain (share)": 0.0316,
+   "Mean absolute SHAP": 0.06859999895095825,
+   "SHAP (share)": 0.048500001430511475
+  },
+  {
+   "Feature": "Complete file",
+   "Gain (share)": 0.0042,
+   "Mean absolute SHAP": 0.06080000102519989,
+   "SHAP (share)": 0.042899999767541885
+  },
+  {
+   "Feature": "Declared income",
+   "Gain (share)": 0.0208,
+   "Mean absolute SHAP": 0.042899999767541885,
+   "SHAP (share)": 0.030300000682473183
+  },
+  {
+   "Feature": "Marital status",
+   "Gain (share)": 0.0184,
+   "Mean absolute SHAP": 0.036400001496076584,
+   "SHAP (share)": 0.025699999183416367
+  },
+  {
+   "Feature": "Commercial segment",
+   "Gain (share)": 0.0126,
+   "Mean absolute SHAP": 0.022299999371170998,
+   "SHAP (share)": 0.015699999406933784
+  },
+  {
+   "Feature": "Customer type",
+   "Gain (share)": 0.0096,
+   "Mean absolute SHAP": 0.021800000220537186,
+   "SHAP (share)": 0.015399999916553497
+  },
+  {
+   "Feature": "Residence zone",
+   "Gain (share)": 0.0156,
+   "Mean absolute SHAP": 0.01759999990463257,
+   "SHAP (share)": 0.012400000356137753
+  }
+ ],
+ "gains": [
+  {
+   "Customers targeted": 0.05,
+   "Departures captured": 0.1002,
+   "Churn rate in the target": 0.7388,
+   "Lift": 2.0046
+  },
+  {
+   "Customers targeted": 0.1,
+   "Departures captured": 0.1902,
+   "Churn rate in the target": 0.701,
+   "Lift": 1.902
+  },
+  {
+   "Customers targeted": 0.2,
+   "Departures captured": 0.3543,
+   "Churn rate in the target": 0.6529,
+   "Lift": 1.7715
+  },
+  {
+   "Customers targeted": 0.3,
+   "Departures captured": 0.5005,
+   "Churn rate in the target": 0.6149,
+   "Lift": 1.6683
+  },
+  {
+   "Customers targeted": 0.5,
+   "Departures captured": 0.7437,
+   "Churn rate in the target": 0.5482,
+   "Lift": 1.4874
+  }
+ ],
+ "risk_levels": [
+  {
+   "level": "Low (< 25%)",
+   "test_customers": 17707,
+   "observed_rate": 0.15
+  },
+  {
+   "level": "Moderate (25–50%)",
+   "test_customers": 14647,
+   "observed_rate": 0.3788
+  },
+  {
+   "level": "High (≥ 50%)",
+   "test_customers": 15502,
+   "observed_rate": 0.6085
+  }
+ ]
+}

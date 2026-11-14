@@ -1,0 +1,782 @@
+{
+ "source": {
+  "file": "data_churn.csv",
+  "sha256": "858551b4293ee1abce4d3aaeac3dea07d817cfd80e111dd52dcff5b06d9fb732",
+  "reference_date": "2024-02-19",
+  "min_cell_size": 20,
+  "note": "Aggregates only. Dates shifted and amounts rounded by the anonymisation."
+ },
+ "overall": {
+  "source_rows": 483536,
+  "accounts": 410309,
+  "active_accounts": 262094,
+  "closed_accounts": 148215,
+  "account_churn_rate": 0.3612,
+  "customers": 363024,
+  "customers_with_account": 319040,
+  "churned_customers": 117345,
+  "customer_churn_rate": 0.3678,
+  "all_customers_churn_rate": 0.3232,
+  "row_churn_rate": 0.4033,
+  "average_customer_tenure": 11.98,
+  "median_balance_active_accounts": 14.0,
+  "overdrawn_share_active": 0.1726,
+  "multi_account_share": 0.1425,
+  "complete_file_share": 0.4725,
+  "overdue_review_share": 0.5127
+ },
+ "customer_axes": {
+  "Age band": [
+   {
+    "category": "Under 18",
+    "count": 10067,
+    "churn_rate": 0.0839
+   },
+   {
+    "category": "18–24",
+    "count": 9054,
+    "churn_rate": 0.2319
+   },
+   {
+    "category": "25–34",
+    "count": 52602,
+    "churn_rate": 0.4443
+   },
+   {
+    "category": "35–44",
+    "count": 66685,
+    "churn_rate": 0.4129
+   },
+   {
+    "category": "45–54",
+    "count": 60413,
+    "churn_rate": 0.3709
+   },
+   {
+    "category": "55–64",
+    "count": 47878,
+    "churn_rate": 0.3525
+   },
+   {
+    "category": "65 and over",
+    "count": 52315,
+    "churn_rate": 0.3467
+   },
+   {
+    "category": "Not provided",
+    "count": 20026,
+    "churn_rate": 0.3033
+   }
+  ],
+  "Tenure": [
+   {
+    "category": "Under 2 years",
+    "count": 8478,
+    "churn_rate": 0.083
+   },
+   {
+    "category": "2–5 years",
+    "count": 48508,
+    "churn_rate": 0.2837
+   },
+   {
+    "category": "5–10 years",
+    "count": 91424,
+    "churn_rate": 0.4551
+   },
+   {
+    "category": "10–15 years",
+    "count": 63124,
+    "churn_rate": 0.3834
+   },
+   {
+    "category": "15 years and over",
+    "count": 105653,
+    "churn_rate": 0.3444
+   },
+   {
+    "category": "Not provided",
+    "count": 1853,
+    "churn_rate": 0.3702
+   }
+  ],
+  "Customer file": [
+   {
+    "category": "Complete",
+    "count": 150750,
+    "churn_rate": 0.2249
+   },
+   {
+    "category": "Incomplete",
+    "count": 168290,
+    "churn_rate": 0.4958
+   }
+  ],
+  "File review": [
+   {
+    "category": "Up to date",
+    "count": 155477,
+    "churn_rate": 0.23
+   },
+   {
+    "category": "Overdue",
+    "count": 163563,
+    "churn_rate": 0.4988
+   }
+  ],
+  "Number of accounts": [
+   {
+    "category": "1",
+    "count": 273575,
+    "churn_rate": 0.3809
+   },
+   {
+    "category": "2",
+    "count": 27189,
+    "churn_rate": 0.2977
+   },
+   {
+    "category": "3",
+    "count": 8623,
+    "churn_rate": 0.2375
+   },
+   {
+    "category": "4",
+    "count": 4328,
+    "churn_rate": 0.2421
+   },
+   {
+    "category": "5 and more",
+    "count": 5325,
+    "churn_rate": 0.3664
+   }
+  ],
+  "Commercial segment": [
+   {
+    "category": "Retail",
+    "count": 290629,
+    "churn_rate": 0.3704
+   },
+   {
+    "category": "Corporate Small",
+    "count": 23216,
+    "churn_rate": 0.3407
+   },
+   {
+    "category": "Corporate",
+    "count": 3097,
+    "churn_rate": 0.3177
+   },
+   {
+    "category": "Premium",
+    "count": 2098,
+    "churn_rate": 0.3765
+   }
+  ],
+  "KYC score": [
+   {
+    "category": "LR",
+    "count": 256284,
+    "churn_rate": 0.3834
+   },
+   {
+    "category": "MR",
+    "count": 31649,
+    "churn_rate": 0.2534
+   },
+   {
+    "category": "H1",
+    "count": 17170,
+    "churn_rate": 0.3507
+   },
+   {
+    "category": "H2",
+    "count": 9796,
+    "churn_rate": 0.3691
+   },
+   {
+    "category": "H3",
+    "count": 4099,
+    "churn_rate": 0.3491
+   }
+  ],
+  "Customer type": [
+   {
+    "category": "Individual",
+    "count": 289138,
+    "churn_rate": 0.3718
+   },
+   {
+    "category": "Legal entity",
+    "count": 18474,
+    "churn_rate": 0.3039
+   },
+   {
+    "category": "Professional",
+    "count": 11424,
+    "churn_rate": 0.3699
+   }
+  ],
+  "Marital status": [
+   {
+    "category": "Single",
+    "count": 145480,
+    "churn_rate": 0.3781
+   },
+   {
+    "category": "Married",
+    "count": 142926,
+    "churn_rate": 0.3681
+   },
+   {
+    "category": "Not provided",
+    "count": 18708,
+    "churn_rate": 0.303
+   },
+   {
+    "category": "Widowed",
+    "count": 7324,
+    "churn_rate": 0.296
+   },
+   {
+    "category": "Divorced",
+    "count": 4602,
+    "churn_rate": 0.4087
+   }
+  ],
+  "Residence zone": [
+   {
+    "category": "Local",
+    "count": 303967,
+    "churn_rate": 0.3649
+   },
+   {
+    "category": "Europe",
+    "count": 8306,
+    "churn_rate": 0.3792
+   },
+   {
+    "category": "Africa / Middle East",
+    "count": 6239,
+    "churn_rate": 0.4914
+   },
+   {
+    "category": "Americas",
+    "count": 369,
+    "churn_rate": 0.4336
+   },
+   {
+    "category": "Asia / Oceania",
+    "count": 96,
+    "churn_rate": 0.3958
+   },
+   {
+    "category": "Other",
+    "count": 63,
+    "churn_rate": 0.3016
+   }
+  ],
+  "Branch group": [
+   {
+    "category": "AG00",
+    "count": 24381,
+    "churn_rate": 0.3722
+   },
+   {
+    "category": "AG01",
+    "count": 8227,
+    "churn_rate": 0.426
+   },
+   {
+    "category": "AG02",
+    "count": 21383,
+    "churn_rate": 0.3743
+   },
+   {
+    "category": "AG03",
+    "count": 25414,
+    "churn_rate": 0.3601
+   },
+   {
+    "category": "AG04",
+    "count": 22043,
+    "churn_rate": 0.3499
+   },
+   {
+    "category": "AG05",
+    "count": 17367,
+    "churn_rate": 0.3234
+   },
+   {
+    "category": "AG06",
+    "count": 13490,
+    "churn_rate": 0.4635
+   },
+   {
+    "category": "AG07",
+    "count": 18039,
+    "churn_rate": 0.3609
+   },
+   {
+    "category": "AG08",
+    "count": 15646,
+    "churn_rate": 0.3959
+   },
+   {
+    "category": "AG09",
+    "count": 9805,
+    "churn_rate": 0.3334
+   },
+   {
+    "category": "AG10",
+    "count": 15757,
+    "churn_rate": 0.3698
+   },
+   {
+    "category": "AG11",
+    "count": 8333,
+    "churn_rate": 0.4317
+   },
+   {
+    "category": "AG12",
+    "count": 10416,
+    "churn_rate": 0.3893
+   },
+   {
+    "category": "AG13",
+    "count": 10057,
+    "churn_rate": 0.3892
+   },
+   {
+    "category": "AG14",
+    "count": 20103,
+    "churn_rate": 0.338
+   },
+   {
+    "category": "AG15",
+    "count": 9321,
+    "churn_rate": 0.364
+   },
+   {
+    "category": "AG16",
+    "count": 23048,
+    "churn_rate": 0.3659
+   },
+   {
+    "category": "AG17",
+    "count": 15599,
+    "churn_rate": 0.3253
+   },
+   {
+    "category": "AG18",
+    "count": 13275,
+    "churn_rate": 0.3617
+   },
+   {
+    "category": "AG19",
+    "count": 5628,
+    "churn_rate": 0.3589
+   },
+   {
+    "category": "AG20",
+    "count": 11708,
+    "churn_rate": 0.3539
+   }
+  ],
+  "Industry": [
+   {
+    "category": "Not provided or other",
+    "count": 292211,
+    "churn_rate": 0.3716
+   },
+   {
+    "category": "Trade",
+    "count": 8845,
+    "churn_rate": 0.3336
+   },
+   {
+    "category": "Manufacturing",
+    "count": 4275,
+    "churn_rate": 0.3462
+   },
+   {
+    "category": "Professional and scientific activities",
+    "count": 1838,
+    "churn_rate": 0.3254
+   },
+   {
+    "category": "Construction",
+    "count": 1737,
+    "churn_rate": 0.2988
+   },
+   {
+    "category": "Other services",
+    "count": 1630,
+    "churn_rate": 0.2847
+   },
+   {
+    "category": "Agriculture, forestry and fishing",
+    "count": 1585,
+    "churn_rate": 0.3338
+   },
+   {
+    "category": "Information and communication",
+    "count": 1171,
+    "churn_rate": 0.3305
+   },
+   {
+    "category": "Accommodation and food services",
+    "count": 1110,
+    "churn_rate": 0.2964
+   },
+   {
+    "category": "Health and social work",
+    "count": 1110,
+    "churn_rate": 0.3775
+   },
+   {
+    "category": "Transport and storage",
+    "count": 961,
+    "churn_rate": 0.3569
+   },
+   {
+    "category": "Administrative and support services",
+    "count": 836,
+    "churn_rate": 0.3014
+   },
+   {
+    "category": "Finance and insurance",
+    "count": 383,
+    "churn_rate": 0.3499
+   },
+   {
+    "category": "Education",
+    "count": 378,
+    "churn_rate": 0.291
+   },
+   {
+    "category": "Arts and recreation",
+    "count": 281,
+    "churn_rate": 0.2527
+   },
+   {
+    "category": "Real estate",
+    "count": 262,
+    "churn_rate": 0.2443
+   },
+   {
+    "category": "Mining and quarrying",
+    "count": 138,
+    "churn_rate": 0.2826
+   },
+   {
+    "category": "Public administration",
+    "count": 107,
+    "churn_rate": 0.243
+   },
+   {
+    "category": "Energy",
+    "count": 69,
+    "churn_rate": 0.3478
+   },
+   {
+    "category": "Household activities",
+    "count": 68,
+    "churn_rate": 0.2794
+   },
+   {
+    "category": "Water and waste",
+    "count": 45,
+    "churn_rate": 0.2
+   }
+  ]
+ },
+ "account_axes": {
+  "Account family": [
+   {
+    "category": "Savings",
+    "count": 176588,
+    "churn_rate": 0.075
+   },
+   {
+    "category": "Not provided",
+    "count": 100478,
+    "churn_rate": 1.0
+   },
+   {
+    "category": "Short-term financing",
+    "count": 22270,
+    "churn_rate": 0.2956
+   },
+   {
+    "category": "Current accounts",
+    "count": 22224,
+    "churn_rate": 0.1704
+   },
+   {
+    "category": "Mortgages",
+    "count": 15953,
+    "churn_rate": 0.2111
+   },
+   {
+    "category": "Consumer credit",
+    "count": 15495,
+    "churn_rate": 0.2288
+   },
+   {
+    "category": "Litigation",
+    "count": 14289,
+    "churn_rate": 0.2414
+   },
+   {
+    "category": "Foreign-currency accounts",
+    "count": 13837,
+    "churn_rate": 0.2312
+   },
+   {
+    "category": "Demand deposits",
+    "count": 8779,
+    "churn_rate": 0.1709
+   },
+   {
+    "category": "Other accounts",
+    "count": 6080,
+    "churn_rate": 0.2961
+   },
+   {
+    "category": "Term deposits",
+    "count": 5790,
+    "churn_rate": 0.8254
+   },
+   {
+    "category": "Investment loans",
+    "count": 3403,
+    "churn_rate": 0.2604
+   },
+   {
+    "category": "Blocked accounts",
+    "count": 3321,
+    "churn_rate": 0.3571
+   },
+   {
+    "category": "Car loans",
+    "count": 1187,
+    "churn_rate": 0.2283
+   },
+   {
+    "category": "Safe-deposit boxes",
+    "count": 615,
+    "churn_rate": 0.226
+   }
+  ],
+  "Currency": [
+   {
+    "category": "Local currency",
+    "count": 295930,
+    "churn_rate": 0.1471
+   },
+   {
+    "category": "Not provided",
+    "count": 100478,
+    "churn_rate": 1.0
+   },
+   {
+    "category": "Euro",
+    "count": 6742,
+    "churn_rate": 0.306
+   },
+   {
+    "category": "US dollar",
+    "count": 3944,
+    "churn_rate": 0.2944
+   },
+   {
+    "category": "Convertible local currency",
+    "count": 2662,
+    "churn_rate": 0.3137
+   },
+   {
+    "category": "Other currencies",
+    "count": 553,
+    "churn_rate": 0.2658
+   }
+  ],
+  "Product group": [
+   {
+    "category": "Savings",
+    "count": 176596,
+    "churn_rate": 0.075
+   },
+   {
+    "category": "Not provided",
+    "count": 151225,
+    "churn_rate": 0.745
+   },
+   {
+    "category": "Current account",
+    "count": 23703,
+    "churn_rate": 0.1904
+   },
+   {
+    "category": "Mortgage",
+    "count": 15457,
+    "churn_rate": 0.2077
+   },
+   {
+    "category": "Consumer credit",
+    "count": 14706,
+    "churn_rate": 0.2208
+   },
+   {
+    "category": "Demand deposit",
+    "count": 10348,
+    "churn_rate": 0.1692
+   },
+   {
+    "category": "Term deposit",
+    "count": 5108,
+    "churn_rate": 0.835
+   },
+   {
+    "category": "Investment loan",
+    "count": 3504,
+    "churn_rate": 0.2503
+   },
+   {
+    "category": "Short-term financing",
+    "count": 3221,
+    "churn_rate": 0.7678
+   },
+   {
+    "category": "Blocked",
+    "count": 2970,
+    "churn_rate": 0.364
+   },
+   {
+    "category": "Foreign-currency account",
+    "count": 1739,
+    "churn_rate": 0.2904
+   },
+   {
+    "category": "Car loan",
+    "count": 1117,
+    "churn_rate": 0.2211
+   },
+   {
+    "category": "Safe-deposit box",
+    "count": 615,
+    "churn_rate": 0.226
+   }
+  ]
+ },
+ "segments": [
+  {
+   "segment": "Retail",
+   "customers": 290629,
+   "churn_rate": 0.3704,
+   "average_tenure": 11.8,
+   "accounts_per_customer": 1.17,
+   "multi_account_share": 0.1084,
+   "complete_file_share": 0.4814,
+   "median_balance_active_customers": 88.0
+  },
+  {
+   "segment": "Corporate Small",
+   "customers": 23216,
+   "churn_rate": 0.3407,
+   "average_tenure": 13.3,
+   "accounts_per_customer": 1.98,
+   "multi_account_share": 0.4442,
+   "complete_file_share": 0.3365,
+   "median_balance_active_customers": 78.0
+  },
+  {
+   "segment": "Corporate",
+   "customers": 3097,
+   "churn_rate": 0.3177,
+   "average_tenure": 15.3,
+   "accounts_per_customer": 5.76,
+   "multi_account_share": 0.7859,
+   "complete_file_share": 0.5199,
+   "median_balance_active_customers": -79.0
+  },
+  {
+   "segment": "Premium",
+   "customers": 2098,
+   "churn_rate": 0.3765,
+   "average_tenure": 14.6,
+   "accounts_per_customer": 2.68,
+   "multi_account_share": 0.5763,
+   "complete_file_share": 0.6816,
+   "median_balance_active_customers": 385.0
+  }
+ ],
+ "closure_reasons": [
+  {
+   "reason": "Other",
+   "accounts": 120129
+  },
+  {
+   "reason": "Not entered",
+   "accounts": 13509
+  },
+  {
+   "reason": "Business closure",
+   "accounts": 10547
+  },
+  {
+   "reason": "Change of address",
+   "accounts": 1803
+  },
+  {
+   "reason": "Death",
+   "accounts": 902
+  },
+  {
+   "reason": "Internal transfer",
+   "accounts": 418
+  },
+  {
+   "reason": "Loan refusal",
+   "accounts": 269
+  },
+  {
+   "reason": "Pricing",
+   "accounts": 248
+  },
+  {
+   "reason": "Change of employer",
+   "accounts": 220
+  },
+  {
+   "reason": "Competing offer",
+   "accounts": 131
+  },
+  {
+   "reason": "Unresolved complaint",
+   "accounts": 24
+  }
+ ],
+ "closures_per_year": [
+  {
+   "year": 2020,
+   "accounts": 36815
+  },
+  {
+   "year": 2021,
+   "accounts": 41647
+  },
+  {
+   "year": 2022,
+   "accounts": 44042
+  },
+  {
+   "year": 2023,
+   "accounts": 18426
+  },
+  {
+   "year": 2024,
+   "accounts": 7285
+  }
+ ]
+}
