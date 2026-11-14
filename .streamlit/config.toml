@@ -1,0 +1,14 @@
+# VIGIE theme — same identity as the report, the slides and Power BI.
+[theme]
+base = "light"
+primaryColor = "#D62839"
+backgroundColor = "#FAFAF7"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#1F2937"
+font = "sans serif"
+
+[browser]
+gatherUsageStats = false
+
+[client]
+toolbarMode = "minimal"

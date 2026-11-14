@@ -1,0 +1,25 @@
+# Continuous integration — VIGIE · Group BI 5
+# On every push: the application tests and the confidentiality safeguards.
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: 05_web_app/requirements.txt
+
+      - name: Install the application dependencies
+        run: pip install -r 05_web_app/requirements.txt pytest
+
+      - name: Tests (encoding, model, application, confidentiality)
+        run: pytest 05_web_app/tests -v

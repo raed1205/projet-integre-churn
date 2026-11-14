@@ -1,0 +1,79 @@
+@startuml classes
+!pragma layout smetana
+!include _style.iuml
+title Class diagram — VIGIE application (05_web_app)
+
+package "utils.artifacts" {
+  class ArtifactStore {
+    + folder : Path
+    + kpi_summary() : dict
+    + kpi_forecast() : dict
+    + model_meta() : dict
+    + model_path : Path
+  }
+}
+
+package "utils.preprocessing" {
+  class Encoder <<module>> {
+    + NUMERIC : list
+    + CATEGORICAL : dict
+    + REVIEW_CYCLE_MONTHS : dict
+    + model_columns() : list
+    + encode(profiles) : DataFrame
+    + normalise_categories(profiles) : DataFrame
+    + months_to_next_review(kyc, months) : float
+    + default_profile() : dict
+  }
+}
+
+package "utils.model" {
+  class ChurnModel {
+    + columns : list
+    + alert_threshold : float
+    + meta : dict
+    - _booster : xgboost.Booster
+    + scores(profiles) : ndarray
+    + contributions(profiles) : DataFrame
+    + observed_rate(score) : float
+    + predict(profile) : Prediction
+  }
+  class Prediction {
+    + score : float
+    + level : str
+    + colour : str
+    + above_threshold : bool
+    + observed_rate : float
+    + contributions : Series
+    + drivers(k) : DataFrame
+  }
+  class FictitiousGenerator {
+    + marginals : dict
+    + generate(n) : DataFrame
+  }
+}
+
+package "pages" {
+  class OverviewPage <<page>>
+  class PredictionPage <<page>>
+  class ForecastPage <<page>>
+  class SegmentsPage <<page>>
+  class MethodPage <<page>>
+}
+
+class Application <<app.py>> {
+  + PAGES : list
+  + navigation()
+}
+
+Application "1" o-- "5" OverviewPage : declares the pages
+ChurnModel "1" *-- "1" ArtifactStore : reads its parameters
+ChurnModel ..> Encoder : encodes the profiles
+ChurnModel ..> Prediction : creates
+FictitiousGenerator ..> Encoder : applies the review cycle
+PredictionPage --> ChurnModel : predict()
+PredictionPage --> FictitiousGenerator : generate()
+OverviewPage --> ArtifactStore : kpi_summary()
+ForecastPage --> ArtifactStore : kpi_forecast()
+SegmentsPage --> ArtifactStore : kpi_summary()
+MethodPage --> ArtifactStore : model_meta()
+@enduml

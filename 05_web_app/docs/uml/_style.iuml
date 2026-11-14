@@ -1,0 +1,41 @@
+' Charte VIGIE commune aux trois diagrammes
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName DejaVu Sans
+skinparam defaultFontSize 13
+skinparam shadowing false
+skinparam roundCorner 12
+skinparam ArrowColor #14213D
+skinparam ArrowThickness 1.3
+skinparam TitleFontSize 18
+skinparam TitleFontColor #14213D
+skinparam TitleFontStyle bold
+skinparam NoteBackgroundColor #FAFAF7
+skinparam NoteBorderColor #E9ECEF
+skinparam ActorBorderColor #14213D
+skinparam ActorBackgroundColor #FAFAF7
+skinparam UsecaseBackgroundColor #FFFFFF
+skinparam UsecaseBorderColor #14213D
+skinparam UsecaseBorderThickness 1.4
+skinparam RectangleBorderColor #D62839
+skinparam RectangleBorderThickness 1.6
+skinparam RectangleBackgroundColor #FAFAF7
+skinparam ClassBackgroundColor #FFFFFF
+skinparam ClassBorderColor #14213D
+skinparam ClassBorderThickness 1.4
+skinparam ClassHeaderBackgroundColor #E9ECEF
+skinparam ClassFontColor #14213D
+skinparam ClassFontStyle bold
+skinparam ClassAttributeFontColor #1F2937
+skinparam ClassStereotypeFontColor #6B7280
+hide circle
+skinparam PackageBorderColor #6B7280
+skinparam PackageFontColor #6B7280
+skinparam SequenceLifeLineBorderColor #6B7280
+skinparam SequenceParticipantBackgroundColor #14213D
+skinparam SequenceParticipantFontColor #FFFFFF
+skinparam SequenceParticipantBorderColor #14213D
+skinparam SequenceActorBorderColor #14213D
+skinparam SequenceGroupBorderColor #6B7280
+skinparam SequenceGroupHeaderFontColor #14213D
+skinparam SequenceBoxBorderColor #E9ECEF
+skinparam SequenceBoxBackgroundColor #FAFAF7
