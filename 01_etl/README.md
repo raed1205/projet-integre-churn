@@ -8,7 +8,6 @@
 | Talend jobs: specification and exports | [`talend/`](talend/README.md) | mandatory |
 | Flow diagram | [`etl_flow.png`](etl_flow.png) | mandatory |
 | Equivalent Python pipeline | [`python_pipeline/etl.py`](python_pipeline/etl.py) | bonus |
-| Collection of sector context | [`scraping/`](scraping/README.md) | bonus |
 
 ## The flow, end to end
 
