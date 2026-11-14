@@ -1,98 +1,98 @@
-# 05 — Application web VIGIE
+# 05 — VIGIE web application
 
-Interface **Streamlit** qui met les analyses à disposition des décideurs : indicateurs de synthèse, score de churn
-expliqué, prévision des clôtures.
+**Streamlit** interface that puts the analyses in the hands of decision-makers: summary indicators, explained churn
+score, closures forecast.
 
-> **Application déployée :** l'URL est indiquée dans le [README principal](../README.md#application-déployée).
-> Procédure de déploiement : [`DEPLOY.md`](DEPLOY.md).
+> **Deployed application:** the URL is given in the [main README](../README.md#deployed-application).
+> Deployment procedure: [`DEPLOY.md`](DEPLOY.md).
 
-![Vue d'ensemble](assets/captures/01_accueil.png)
+![Overview](assets/screenshots/01_overview.png)
 
-## Les trois fonctionnalités demandées
+## The three required features
 
-| Fonctionnalité | Page | Ce qu'elle montre |
+| Feature | Page | What it shows |
 |---|---|---|
-| **KPI de synthèse** | Vue d'ensemble | 8 indicateurs agrégés, taux de churn par axe, clôtures dans le temps |
-| **Prédiction individuelle** | Prédiction du churn | formulaire de profil fictif → probabilité de départ, niveau de risque, facteurs explicatifs (SHAP), piste d'action |
-| **Prévision du KPI** | Prévision du KPI | prévision LSTM des 8 prochaines semaines, intervalle, comparaison aux références simples |
+| **Summary KPIs** | Overview | 8 aggregated indicators, churn rate by axis, closures over time |
+| **Individual prediction** | Churn prediction | fictitious profile form → probability of leaving, risk level, drivers (SHAP), suggested action |
+| **KPI forecast** | KPI forecast | LSTM forecast of the next 8 weeks, interval, comparison with simple references |
 
-Et deux pages complémentaires : **Segments et profils** (churn par axe, valeur des segments) et **Méthode et équipe**
-(fiche du modèle, contrôle de fuite, protection des données). L'onglet *Un portefeuille fictif* génère des profils
-fictifs et les classe par risque.
+Two extra pages: **Segments and profiles** (churn by axis, segment value) and **Method and team** (model card,
+leakage check, data protection, team). The *A fictitious portfolio* tab generates fictitious profiles and ranks them
+by risk.
 
-| Prédiction expliquée | Prévision du KPI |
+| Explained prediction | KPI forecast |
 |---|---|
-| ![Prédiction](assets/captures/02_prediction.png) | ![Prévision](assets/captures/03_prevision.png) |
+| ![Prediction](assets/screenshots/02_prediction.png) | ![Forecast](assets/screenshots/03_forecast.png) |
 
 ## Structure
 
 ```
 05_web_app/
-├── app.py                      # point d'entrée : configuration et navigation
+├── app.py                     # entry point: configuration and navigation
 ├── pages/
-│   ├── 0_Vue_d_ensemble.py     # KPI de synthèse
-│   ├── 1_Prediction_du_churn.py
-│   ├── 2_Prevision_du_KPI.py
-│   ├── 3_Segments_et_profils.py
-│   └── 4_Methode_et_equipe.py
+│   ├── 0_Overview.py          # summary KPIs
+│   ├── 1_Churn_Prediction.py
+│   ├── 2_KPI_Forecast.py
+│   ├── 3_Segments.py
+│   └── 4_Method_and_Team.py
 ├── utils/
-│   ├── preprocessing.py        # profil → 31 variables (code partagé avec l'entraînement)
-│   ├── model.py                # ModeleChurn, Prediction, GenerateurFictif
-│   ├── artefacts.py            # DepotArtefacts : lecture des fichiers JSON
-│   └── charte.py               # identité visuelle et composants
-├── artifacts/                  # agrégats et paramètres du modèle (JSON)
-├── assets/                     # logo et captures d'écran
-├── docs/uml/                   # 3 diagrammes UML (sources PlantUML + PNG)
-├── tests/                      # 26 tests automatisés
+│   ├── preprocessing.py       # profile → 31 features (code shared with training)
+│   ├── model.py               # ChurnModel, Prediction, FictitiousGenerator
+│   ├── artifacts.py           # ArtifactStore: reads the JSON files
+│   └── theme.py               # visual identity and components
+├── artifacts/                 # aggregates and model parameters (JSON)
+├── assets/                    # logo and screenshots
+├── docs/uml/                  # 3 UML diagrams (PlantUML sources + PNG)
+├── tests/                     # 26 automated tests
 ├── requirements.txt
 └── DEPLOY.md
 ```
 
-## Diagrammes UML
+## UML diagrams
 
-Sources PlantUML dans [`docs/uml/`](docs/uml/) ; régénération : `java -jar plantuml.jar docs/uml/*.puml`.
+PlantUML sources in [`docs/uml/`](docs/uml/); regenerate with `java -jar plantuml.jar docs/uml/*.puml`.
 
-### Cas d'utilisation global
+### Global use case
 
-![Cas d'utilisation](docs/uml/cas_utilisation.png)
+![Use case](docs/uml/use_case.png)
 
-### Séquence — la demande de prédiction
+### Sequence — the prediction request
 
-![Séquence](docs/uml/sequence_prediction.png)
+![Sequence](docs/uml/prediction_sequence.png)
 
 ### Classes
 
 ![Classes](docs/uml/classes.png)
 
-## Protection des données
+## Data protection
 
-| Règle du projet | Comment elle est tenue |
+| Project rule | How it is enforced |
 |---|---|
-| Aucune ligne client, aucun identifiant, aucun export | l'application ne lit que `artifacts/` : des agrégats et des paramètres |
-| Uniquement des profils fictifs | le formulaire est saisi à la main ; le portefeuille est tiré de distributions marginales |
-| Aucun petit effectif | toute modalité de moins de 20 individus est écartée à l'export |
-| Aucun modèle sérialisé dans le dépôt | le modèle est publié en JSON d'arbres (seuils et valeurs de feuilles), sans observation |
+| No customer row, no identifier, no export | the app only reads `artifacts/`: aggregates and parameters |
+| Fictitious profiles only | the form is typed by hand; the portfolio is drawn from marginal distributions |
+| No small counts | any category with fewer than 20 individuals is dropped at export |
+| No serialised model in the repository | the model is published as JSON trees (thresholds and leaf values), no observation |
 
-Ces règles sont **vérifiées automatiquement** par `tests/test_confidentialite.py` à chaque envoi de code.
+These rules are **checked automatically** by `tests/test_confidentiality.py` on every push.
 
-### Que contient `artifacts/` ?
+### What does `artifacts/` contain?
 
-| Fichier | Contenu | Produit par |
+| File | Content | Produced by |
 |---|---|---|
-| `kpi_synthese.json` | indicateurs globaux, taux de churn par axe, segments | `04_machine_learning/notebooks/03_churn_ml.ipynb` |
-| `prevision_kpi.json` | série hebdomadaire, prévisions, comparaison des modèles | `04_machine_learning/notebooks/02_lstm_rnn.ipynb` |
-| `modele_churn.json` | arbres XGBoost | `03_churn_ml.ipynb` |
-| `modele_churn_meta.json` | seuil, métriques, importance, distributions marginales | `03_churn_ml.ipynb` |
+| `kpi_summary.json` | overall indicators, churn rate by axis, segments | `04_machine_learning/notebooks/03_churn_ml.ipynb` |
+| `kpi_forecast.json` | weekly series, forecasts, model comparison | `04_machine_learning/notebooks/02_lstm_rnn.ipynb` |
+| `churn_model.json` | XGBoost trees | `03_churn_ml.ipynb` |
+| `churn_model_meta.json` | threshold, metrics, importance, marginal distributions | `03_churn_ml.ipynb` |
 
-## Une prédiction cohérente avec l'entraînement
+## A prediction consistent with training
 
-* `utils/preprocessing.py` est **le seul** code qui transforme un profil en variables. L'entraînement l'importe :
-  il ne peut pas y avoir d'écart entre ce que le modèle a appris et ce qu'on lui présente.
-* La prochaine revue est **déduite** de la dernière et du score KYC (cycle de 48, 36 ou 24 mois, constaté dans les
-  données) : le formulaire ne permet pas de saisir un profil incohérent.
-* L'explication affichée est exacte : valeur de base + somme des contributions = score (vérifié par un test).
+* `utils/preprocessing.py` is **the only** code that turns a profile into features. Training imports it: there can
+  be no gap between what the model learnt and what it is shown.
+* The next review is **derived** from the last one and the KYC score (48, 36 or 24-month cycle, found in the data):
+  the form cannot produce an inconsistent profile.
+* The displayed explanation is exact: base value + sum of contributions = score (checked by a test).
 
-## Tests et intégration continue (bonus DevOps)
+## Tests and continuous integration (DevOps bonus)
 
 ```bash
 pip install -r 05_web_app/requirements.txt pytest
@@ -102,11 +102,11 @@ pip install -r 05_web_app/requirements.txt pytest
 pytest 05_web_app/tests -v
 ```
 
-| Fichier | Ce qui est vérifié |
+| File | What is checked |
 |---|---|
-| `test_preprocessing.py` | colonnes figées, encodage, valeurs manquantes, modalités inconnues, cycle de revue |
-| `test_model.py` | score entre 0 et 1, explication exacte, sens des effets, portefeuille fictif |
-| `test_application.py` | l'application démarre, les 5 pages s'exécutent, le formulaire réagit |
-| `test_confidentialite.py` | aucun fichier de données, aucun identifiant, aucun petit effectif, cohérence des volumes |
+| `test_preprocessing.py` | fixed columns, encoding, missing values, unknown categories, review cycle |
+| `test_model.py` | score between 0 and 1, exact explanation, direction of effects, fictitious portfolio |
+| `test_application.py` | the app starts, the 5 pages run, the form reacts |
+| `test_confidentiality.py` | no data file, no identifier, no small count, consistent volumes |
 
-Le fichier [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) rejoue ces tests à chaque `push` (GitHub Actions).
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) re-runs these tests on every push (GitHub Actions).

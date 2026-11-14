@@ -1,0 +1,46 @@
+@startuml use_case
+!pragma layout smetana
+!include _style.iuml
+left to right direction
+title Global use case diagram — VIGIE application
+
+actor "Customer\nadvisor" as Advisor
+actor "Retention\nmanager" as Manager
+actor "BI analyst\n(Group BI 5)" as Analyst
+actor "Supervisor /\nvisitor" as Visitor
+
+rectangle "VIGIE web application" {
+  usecase "View the summary\nKPIs" as UC1
+  usecase "Predict the churn risk\nof a fictitious profile" as UC2
+  usecase "Understand the score\ndrivers (SHAP)" as UC3
+  usecase "View the closures\nforecast (LSTM)" as UC4
+  usecase "Compare the LSTM\nwith simple references" as UC5
+  usecase "Explore churn\nby segment" as UC6
+  usecase "Simulate a portfolio\nof fictitious profiles" as UC7
+  usecase "View the method\nand the model card" as UC8
+}
+
+rectangle "Outside the application (analyst's workstation)" {
+  usecase "Re-train the models\nand publish the artefacts" as UC9
+}
+
+Advisor --> UC1
+Advisor --> UC2
+Manager --> UC1
+Manager --> UC4
+Manager --> UC6
+Manager --> UC7
+Visitor --> UC1
+Visitor --> UC8
+Analyst --> UC8
+Analyst --> UC9
+
+UC2 ..> UC3 : <<include>>
+UC7 ..> UC2 : <<include>>
+UC5 ..> UC4 : <<extend>>
+
+legend bottom right
+  The published artefacts are aggregates and model
+  parameters (JSON). No customer data leaves the workstation.
+endlegend
+@enduml

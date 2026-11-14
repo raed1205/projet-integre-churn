@@ -1,4 +1,4 @@
-"""L'encodage d'un profil doit être stable : c'est le contrat entre l'entraînement et l'application."""
+"""Encoding a profile must be stable: it is the contract between training and the application."""
 
 import numpy as np
 import pandas as pd
@@ -7,51 +7,50 @@ import pytest
 from utils import preprocessing
 
 
-def test_colonnes_du_modele_sont_figees():
-    colonnes = preprocessing.colonnes_modele()
-    assert len(colonnes) == 31
-    assert colonnes[:7] == preprocessing.NUMERIQUES
-    assert len(set(colonnes)) == len(colonnes)
+def test_model_columns_are_fixed():
+    columns = preprocessing.model_columns()
+    assert len(columns) == 31
+    assert columns[:7] == preprocessing.NUMERIC
+    assert len(set(columns)) == len(columns)
 
 
-def test_encodage_d_un_profil():
-    X = preprocessing.encoder(pd.DataFrame([preprocessing.profil_par_defaut()]))
-    assert list(X.columns) == preprocessing.colonnes_modele()
+def test_encoding_a_profile():
+    X = preprocessing.encode(pd.DataFrame([preprocessing.default_profile()]))
+    assert list(X.columns) == preprocessing.model_columns()
     assert X.loc[0, "AGE"] == 40
-    assert X.loc[0, "STATUT_MARITAL=M"] == 1 and X.loc[0, "STATUT_MARITAL=C"] == 0
-    # exactement une indicatrice active par variable catégorielle
-    for variable in preprocessing.CATEGORIELLES:
-        assert X.filter(like=f"{variable}=").sum(axis=1).iloc[0] == 1
+    assert X.loc[0, "MARITAL_STATUS=M"] == 1 and X.loc[0, "MARITAL_STATUS=C"] == 0
+    for feature in preprocessing.CATEGORICAL:          # exactly one active indicator per categorical feature
+        assert X.filter(like=f"{feature}=").sum(axis=1).iloc[0] == 1
 
 
-def test_valeur_manquante_conservee():
-    X = preprocessing.encoder(pd.DataFrame([preprocessing.profil_par_defaut()]))
-    assert np.isnan(X.loc[0, "SALAIRE"])          # revenu non déclaré : reste manquant
+def test_missing_value_is_kept():
+    X = preprocessing.encode(pd.DataFrame([preprocessing.default_profile()]))
+    assert np.isnan(X.loc[0, "SALARY"])               # income not declared: stays missing
 
 
-def test_modalite_inconnue_rangee_dans_la_derniere():
-    profil = preprocessing.profil_par_defaut() | {"NATURE_CLIENT": "TRPP", "STATUT_MARITAL": None}
-    X = preprocessing.encoder(pd.DataFrame([profil]))
-    assert X.loc[0, "NATURE_CLIENT=AUTRE"] == 1
-    assert X.loc[0, "STATUT_MARITAL=NR"] == 1
+def test_unknown_category_goes_to_the_last_one():
+    profile = preprocessing.default_profile() | {"CUSTOMER_TYPE": "TRPP", "MARITAL_STATUS": None}
+    X = preprocessing.encode(pd.DataFrame([profile]))
+    assert X.loc[0, "CUSTOMER_TYPE=OTHER"] == 1
+    assert X.loc[0, "MARITAL_STATUS=NR"] == 1
 
 
-def test_variable_absente_refusee():
-    profil = preprocessing.profil_par_defaut()
-    del profil["AGE"]
+def test_missing_feature_is_rejected():
+    profile = preprocessing.default_profile()
+    del profile["AGE"]
     with pytest.raises(ValueError, match="AGE"):
-        preprocessing.encoder(pd.DataFrame([profil]))
+        preprocessing.encode(pd.DataFrame([profile]))
 
 
-def test_chaque_variable_a_un_libelle():
-    for variable in list(preprocessing.NUMERIQUES) + list(preprocessing.CATEGORIELLES):
-        assert variable in preprocessing.LIBELLES
+def test_every_feature_has_a_label():
+    for feature in list(preprocessing.NUMERIC) + list(preprocessing.CATEGORICAL):
+        assert feature in preprocessing.LABELS
 
 
-def test_cycle_de_revue_selon_le_score_kyc():
-    assert preprocessing.mois_avant_prochaine_revue("LR", 12) == 36      # cycle de 48 mois
-    assert preprocessing.mois_avant_prochaine_revue("MR", 12) == 24      # cycle de 36 mois
-    assert preprocessing.mois_avant_prochaine_revue("H2", 30) == -6      # cycle de 24 mois : revue en retard
-    defaut = preprocessing.profil_par_defaut()
-    assert defaut["MOIS_AVANT_PROCHAINE_REVUE"] == preprocessing.mois_avant_prochaine_revue(
-        defaut["SCORE_KYC"], defaut["MOIS_DEPUIS_REVUE"])
+def test_review_cycle_depends_on_the_kyc_score():
+    assert preprocessing.months_to_next_review("LR", 12) == 36      # 48-month cycle
+    assert preprocessing.months_to_next_review("MR", 12) == 24      # 36-month cycle
+    assert preprocessing.months_to_next_review("H2", 30) == -6      # 24-month cycle: review overdue
+    default = preprocessing.default_profile()
+    assert default["MONTHS_TO_NEXT_REVIEW"] == preprocessing.months_to_next_review(
+        default["KYC_SCORE"], default["MONTHS_SINCE_REVIEW"])

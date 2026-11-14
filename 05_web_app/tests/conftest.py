@@ -1,8 +1,8 @@
-"""Configuration commune des tests : rend `utils` importable comme le fait Streamlit."""
+"""Shared test setup: makes `utils` importable the way Streamlit does."""
 
 import sys
 from pathlib import Path
 
 APP = Path(__file__).resolve().parents[1]
-RACINE = APP.parent
+ROOT = APP.parent
 sys.path.insert(0, str(APP))

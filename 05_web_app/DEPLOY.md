@@ -1,9 +1,9 @@
-# Déploiement de l'application VIGIE
+# Deploying the VIGIE application
 
-L'application est une application **Streamlit**. Elle ne lit que le dossier `05_web_app/artifacts/`
-(agrégats et paramètres du modèle) : le déploiement ne transporte **aucune donnée**.
+The application is a **Streamlit** app. It only reads the `05_web_app/artifacts/` folder (aggregates and model
+parameters): deploying it carries **no data**.
 
-## 1. Lancer en local
+## 1. Run locally
 
 ```bash
 pip install -r 05_web_app/requirements.txt
@@ -13,49 +13,49 @@ pip install -r 05_web_app/requirements.txt
 streamlit run 05_web_app/app.py
 ```
 
-L'application s'ouvre sur <http://localhost:8501>. La commande se lance **depuis la racine du dépôt**, pour que le
-thème `.streamlit/config.toml` soit pris en compte.
+The app opens at <http://localhost:8501>. Run the command **from the repository root** so that the theme in
+`.streamlit/config.toml` is applied.
 
-## 2. Déployer sur Streamlit Community Cloud (gratuit)
+## 2. Deploy on Streamlit Community Cloud (free)
 
-1. Pousser le dépôt sur GitHub (branche `main`).
-2. Ouvrir <https://share.streamlit.io> et se connecter avec le compte GitHub du groupe.
-3. **Create app → Deploy a public app from GitHub**, puis renseigner :
+1. Push the repository to GitHub (`main` branch).
+2. Open <https://share.streamlit.io> and sign in with the group's GitHub account.
+3. **Create app → Deploy a public app from GitHub**, then fill in:
 
-   | Champ | Valeur |
+   | Field | Value |
    |---|---|
    | Repository | `raed1205/projet-integre-churn` |
    | Branch | `main` |
    | Main file path | `05_web_app/app.py` |
-   | App URL | par exemple `vigie-bi5` |
+   | App URL | e.g. `vigie-bi5` |
 
-4. **Advanced settings → Python version : 3.11**, puis **Deploy**.
-5. Copier l'URL obtenue dans le `README.md` principal (section « Application déployée »).
+4. **Advanced settings → Python version: 3.11**, then **Deploy**.
+5. Copy the resulting URL into the main `README.md` ("Deployed application" section).
 
-Streamlit Cloud installe automatiquement `05_web_app/requirements.txt` (le fichier le plus proche du point d'entrée)
-et lit le thème dans `.streamlit/config.toml` à la racine. Aucun secret n'est nécessaire.
+Streamlit Cloud installs `05_web_app/requirements.txt` automatically (the file closest to the entry point) and reads
+the theme from `.streamlit/config.toml` at the root. No secret is needed.
 
-> Si le dépôt est privé, Streamlit Community Cloud permet de déployer **une** application privée par compte ; il
-> faut alors inviter les tuteurs comme lecteurs de l'application (menu *Share*).
+> If the repository is private, Streamlit Community Cloud allows **one** private app per account; invite the
+> supervisors as viewers of the app (*Share* menu).
 
-## 3. Autres hébergeurs
+## 3. Other hosts
 
-| Hébergeur | Réglage |
+| Host | Setting |
 |---|---|
-| Hugging Face Spaces | SDK *Streamlit* ; copier le contenu de `05_web_app/` et `.streamlit/` à la racine du Space |
-| Render / Railway | commande de démarrage : `streamlit run 05_web_app/app.py --server.port $PORT --server.address 0.0.0.0` |
+| Hugging Face Spaces | *Streamlit* SDK; copy the content of `05_web_app/` and `.streamlit/` to the root of the Space |
+| Render / Railway | start command: `streamlit run 05_web_app/app.py --server.port $PORT --server.address 0.0.0.0` |
 
-## 4. Mettre à jour l'application après un ré-entraînement
+## 4. Updating the application after re-training
 
-1. Ré-exécuter les notebooks de `04_machine_learning/notebooks/` (ils réécrivent `05_web_app/artifacts/`).
-2. Lancer les tests : `pytest 05_web_app/tests` — ils vérifient notamment qu'aucun identifiant ni aucun petit effectif
-   n'a été publié.
-3. Commiter et pousser : Streamlit Cloud redéploie tout seul.
+1. Re-run the notebooks of `04_machine_learning/notebooks/` (they rewrite `05_web_app/artifacts/`).
+2. Run the tests: `pytest 05_web_app/tests` — among other things they check that no identifier and no small count
+   was published.
+3. Commit and push: Streamlit Cloud redeploys on its own.
 
-## 5. Vérifications avant la soutenance
+## 5. Checks before the defence
 
-- [ ] L'URL publique s'ouvre en navigation privée.
-- [ ] Les cinq pages s'affichent sans erreur.
-- [ ] Le formulaire de prédiction renvoie un score et ses facteurs.
-- [ ] L'URL figure dans le `README.md` principal.
-- [ ] Une vidéo de secours de la démonstration est enregistrée (`07_presentation/`).
+- [ ] The public URL opens in a private browser window.
+- [ ] The five pages display without error.
+- [ ] The prediction form returns a score and its drivers.
+- [ ] The URL appears in the main `README.md`.
+- [ ] A backup video of the demo is recorded (`07_presentation/`).

@@ -1,63 +1,63 @@
 @startuml classes
 !pragma layout smetana
 !include _style.iuml
-title Diagramme de classes — application VIGIE (05_web_app)
+title Class diagram — VIGIE application (05_web_app)
 
-package "utils.artefacts" {
-  class DepotArtefacts {
-    + dossier : Path
-    + kpi_synthese() : dict
-    + prevision_kpi() : dict
-    + meta_modele() : dict
-    + chemin_modele : Path
+package "utils.artifacts" {
+  class ArtifactStore {
+    + folder : Path
+    + kpi_summary() : dict
+    + kpi_forecast() : dict
+    + model_meta() : dict
+    + model_path : Path
   }
 }
 
 package "utils.preprocessing" {
-  class Encodeur <<module>> {
-    + NUMERIQUES : list
-    + CATEGORIELLES : dict
-    + CYCLE_REVUE_MOIS : dict
-    + colonnes_modele() : list
-    + encoder(profils) : DataFrame
-    + normaliser_modalites(profils) : DataFrame
-    + mois_avant_prochaine_revue(kyc, mois) : float
-    + profil_par_defaut() : dict
+  class Encoder <<module>> {
+    + NUMERIC : list
+    + CATEGORICAL : dict
+    + REVIEW_CYCLE_MONTHS : dict
+    + model_columns() : list
+    + encode(profiles) : DataFrame
+    + normalise_categories(profiles) : DataFrame
+    + months_to_next_review(kyc, months) : float
+    + default_profile() : dict
   }
 }
 
 package "utils.model" {
-  class ModeleChurn {
-    + colonnes : list
-    + seuil_alerte : float
+  class ChurnModel {
+    + columns : list
+    + alert_threshold : float
     + meta : dict
     - _booster : xgboost.Booster
-    + scores(profils) : ndarray
-    + contributions(profils) : DataFrame
-    + taux_observe(score) : float
-    + predire(profil) : Prediction
+    + scores(profiles) : ndarray
+    + contributions(profiles) : DataFrame
+    + observed_rate(score) : float
+    + predict(profile) : Prediction
   }
   class Prediction {
     + score : float
-    + niveau : str
-    + couleur : str
-    + au_dessus_du_seuil : bool
-    + taux_observe : float
+    + level : str
+    + colour : str
+    + above_threshold : bool
+    + observed_rate : float
     + contributions : Series
-    + facteurs(n) : DataFrame
+    + drivers(k) : DataFrame
   }
-  class GenerateurFictif {
-    + marginales : dict
-    + generer(n) : DataFrame
+  class FictitiousGenerator {
+    + marginals : dict
+    + generate(n) : DataFrame
   }
 }
 
 package "pages" {
-  class PageVueEnsemble <<page>>
-  class PagePrediction <<page>>
-  class PagePrevision <<page>>
-  class PageSegments <<page>>
-  class PageMethode <<page>>
+  class OverviewPage <<page>>
+  class PredictionPage <<page>>
+  class ForecastPage <<page>>
+  class SegmentsPage <<page>>
+  class MethodPage <<page>>
 }
 
 class Application <<app.py>> {
@@ -65,15 +65,15 @@ class Application <<app.py>> {
   + navigation()
 }
 
-Application "1" o-- "5" PageVueEnsemble : déclare les pages
-ModeleChurn "1" *-- "1" DepotArtefacts : lit ses paramètres
-ModeleChurn ..> Encodeur : encode les profils
-ModeleChurn ..> Prediction : crée
-GenerateurFictif ..> Encodeur : applique le cycle de revue
-PagePrediction --> ModeleChurn : predire()
-PagePrediction --> GenerateurFictif : generer()
-PageVueEnsemble --> DepotArtefacts : kpi_synthese()
-PagePrevision --> DepotArtefacts : prevision_kpi()
-PageSegments --> DepotArtefacts : kpi_synthese()
-PageMethode --> DepotArtefacts : meta_modele()
+Application "1" o-- "5" OverviewPage : declares the pages
+ChurnModel "1" *-- "1" ArtifactStore : reads its parameters
+ChurnModel ..> Encoder : encodes the profiles
+ChurnModel ..> Prediction : creates
+FictitiousGenerator ..> Encoder : applies the review cycle
+PredictionPage --> ChurnModel : predict()
+PredictionPage --> FictitiousGenerator : generate()
+OverviewPage --> ArtifactStore : kpi_summary()
+ForecastPage --> ArtifactStore : kpi_forecast()
+SegmentsPage --> ArtifactStore : kpi_summary()
+MethodPage --> ArtifactStore : model_meta()
 @enduml

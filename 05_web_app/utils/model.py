@@ -1,11 +1,11 @@
-"""Chargement et inférence du modèle de churn.
+"""Loading and inference of the churn model.
 
-Le modèle est un XGBoost stocké en JSON (arbres uniquement). L'inférence produit :
+The model is an XGBoost stored as JSON (trees only). Inference produces:
 
-* un **score** : probabilité que le client parte ;
-* un **niveau de risque** : faible, modéré ou élevé ;
-* une **explication** : la contribution de chaque variable au score (valeurs SHAP exactes,
-  calculées par XGBoost lui-même).
+* a **score**: probability that the customer leaves;
+* a **risk level**: low, moderate or high;
+* an **explanation**: the contribution of each feature to the score (exact SHAP values,
+  computed by XGBoost itself).
 """
 
 from __future__ import annotations
@@ -17,130 +17,128 @@ import pandas as pd
 import xgboost as xgb
 
 from . import preprocessing
-from .artefacts import DepotArtefacts
+from .artifacts import ArtifactStore
 
-NIVEAUX = [  # (borne haute exclue, libellé, couleur)
-    (0.25, "Faible", "#2A9D8F"),
-    (0.50, "Modéré", "#F4A261"),
-    (1.01, "Élevé", "#D62839"),
+LEVELS = [  # (upper bound excluded, label, colour)
+    (0.25, "Low", "#2A9D8F"),
+    (0.50, "Moderate", "#F4A261"),
+    (1.01, "High", "#D62839"),
 ]
 
 
-def niveau_de_risque(score: float) -> tuple[str, str]:
-    """Traduit un score en niveau de risque et en couleur."""
-    for borne, libelle, couleur in NIVEAUX:
-        if score < borne:
-            return libelle, couleur
-    return NIVEAUX[-1][1], NIVEAUX[-1][2]
+def risk_level(score: float) -> tuple[str, str]:
+    """Turn a score into a risk level and a colour."""
+    for bound, label, colour in LEVELS:
+        if score < bound:
+            return label, colour
+    return LEVELS[-1][1], LEVELS[-1][2]
 
 
 @dataclass
 class Prediction:
-    """Résultat d'une demande de score pour un profil."""
-    score: float                         # probabilité de départ, entre 0 et 1
-    niveau: str                          # Faible / Modéré / Élevé
-    couleur: str
-    au_dessus_du_seuil: bool             # score ≥ seuil d'alerte du modèle
-    taux_observe: float | None           # taux de départ réel des clients de test au score comparable
-    contributions: pd.Series = field(repr=False, default=None)   # effet de chaque variable (log-odds)
+    """Result of a scoring request for one profile."""
+    score: float                       # probability of leaving, between 0 and 1
+    level: str                         # Low / Moderate / High
+    colour: str
+    above_threshold: bool              # score ≥ the model's alert threshold
+    observed_rate: float | None        # actual departure rate of test customers with a similar score
+    contributions: pd.Series = field(repr=False, default=None)   # effect of each feature (log-odds)
 
-    def facteurs(self, n: int = 6) -> pd.DataFrame:
-        """Les ``n`` variables qui pèsent le plus, avec le sens de leur effet."""
-        c = self.contributions.reindex(self.contributions.abs().sort_values(ascending=False).index).head(n)
+    def drivers(self, k: int = 6) -> pd.DataFrame:
+        """The ``k`` features that weigh the most, with the direction of their effect."""
+        c = self.contributions.reindex(self.contributions.abs().sort_values(ascending=False).index).head(k)
         return pd.DataFrame({
-            "variable": c.index,
-            "libelle": [preprocessing.LIBELLES[v] for v in c.index],
-            "effet": c.values,
-            "sens": np.where(c.values > 0, "augmente le risque", "réduit le risque"),
+            "feature": c.index,
+            "label": [preprocessing.LABELS[v] for v in c.index],
+            "effect": c.values,
+            "direction": np.where(c.values > 0, "raises the risk", "lowers the risk"),
         })
 
 
-class ModeleChurn:
-    """Modèle de churn prêt à l'emploi : encode un profil, calcule son score et l'explique."""
+class ChurnModel:
+    """Ready-to-use churn model: encodes a profile, scores it and explains the score."""
 
-    def __init__(self, depot: DepotArtefacts | None = None):
-        self.depot = depot or DepotArtefacts()
-        self.meta = self.depot.meta_modele()
-        self.colonnes = self.meta["colonnes"]
-        self.seuil_alerte = float(self.meta["seuil_alerte"])
+    def __init__(self, store: ArtifactStore | None = None):
+        self.store = store or ArtifactStore()
+        self.meta = self.store.model_meta()
+        self.columns = self.meta["columns"]
+        self.alert_threshold = float(self.meta["alert_threshold"])
         self._booster = xgb.Booster()
-        self._booster.load_model(str(self.depot.chemin_modele))
-        if self.colonnes != preprocessing.colonnes_modele():
-            raise ValueError("Les colonnes du modèle ne correspondent pas à celles de l'encodeur.")
+        self._booster.load_model(str(self.store.model_path))
+        if self.columns != preprocessing.model_columns():
+            raise ValueError("The model columns do not match those of the encoder.")
 
-    # ------------------------------------------------------------------ inférence
-    def _matrice(self, profils: pd.DataFrame) -> xgb.DMatrix:
-        X = preprocessing.encoder(profils)
-        return xgb.DMatrix(X.to_numpy(dtype="float32"), feature_names=self.colonnes, missing=np.nan)
+    def _matrix(self, profiles: pd.DataFrame) -> xgb.DMatrix:
+        X = preprocessing.encode(profiles)
+        return xgb.DMatrix(X.to_numpy(dtype="float32"), feature_names=self.columns, missing=np.nan)
 
-    def scores(self, profils: pd.DataFrame) -> np.ndarray:
-        """Probabilité de départ pour chaque profil (une ligne = un profil)."""
-        return self._booster.predict(self._matrice(profils))
+    def scores(self, profiles: pd.DataFrame) -> np.ndarray:
+        """Probability of leaving for each profile (one row = one profile)."""
+        return self._booster.predict(self._matrix(profiles))
 
-    def contributions(self, profils: pd.DataFrame) -> pd.DataFrame:
-        """Contribution de chaque variable métier (les indicatrices d'une même variable sont additionnées)."""
-        brut = self._booster.predict(self._matrice(profils), pred_contribs=True)[:, :-1]
-        par_colonne = pd.DataFrame(brut, columns=self.colonnes, index=profils.index)
-        variables = [preprocessing.variable_d_origine(c) for c in self.colonnes]
-        return par_colonne.T.groupby(variables, sort=False).sum().T
+    def contributions(self, profiles: pd.DataFrame) -> pd.DataFrame:
+        """Contribution of each business feature (indicator columns of a feature are added up)."""
+        raw = self._booster.predict(self._matrix(profiles), pred_contribs=True)[:, :-1]
+        per_column = pd.DataFrame(raw, columns=self.columns, index=profiles.index)
+        feats = [preprocessing.source_feature(c) for c in self.columns]
+        return per_column.T.groupby(feats, sort=False).sum().T
 
-    def taux_observe(self, score: float) -> float | None:
-        """Taux de départ réellement observé, sur le jeu de test, pour les scores de la même tranche."""
-        for tranche in self.meta["score_vers_taux_observe"]:
-            if tranche["de"] <= score <= tranche["a"]:
-                return float(tranche["taux_observe"])
+    def observed_rate(self, score: float) -> float | None:
+        """Departure rate actually observed on the test set for scores in the same band."""
+        for band in self.meta["score_to_observed_rate"]:
+            if band["from"] <= score <= band["to"]:
+                return float(band["observed_rate"])
         return None
 
-    def predire(self, profil: dict) -> Prediction:
-        """Score, niveau de risque et explication pour **un** profil."""
-        table = pd.DataFrame([profil])
+    def predict(self, profile: dict) -> Prediction:
+        """Score, risk level and explanation for **one** profile."""
+        table = pd.DataFrame([profile])
         score = float(self.scores(table)[0])
-        niveau, couleur = niveau_de_risque(score)
+        level, colour = risk_level(score)
         return Prediction(
-            score=score, niveau=niveau, couleur=couleur,
-            au_dessus_du_seuil=score >= self.seuil_alerte,
-            taux_observe=self.taux_observe(score),
+            score=score, level=level, colour=colour,
+            above_threshold=score >= self.alert_threshold,
+            observed_rate=self.observed_rate(score),
             contributions=self.contributions(table).iloc[0],
         )
 
 
-class GenerateurFictif:
-    """Fabrique des profils **fictifs** à partir des distributions marginales publiées.
+class FictitiousGenerator:
+    """Builds **fictitious** profiles from the published marginal distributions.
 
-    Chaque variable est tirée indépendamment des autres : les profils obtenus sont plausibles
-    variable par variable, mais ne correspondent à aucun client réel. Seule la prochaine revue
-    est déduite des autres variables (règle du cycle de revue), pour que le profil reste cohérent.
+    Each feature is drawn independently of the others: the profiles are plausible feature by
+    feature but match no real customer. Only the next review is derived from the other features
+    (review-cycle rule), so that the profile stays consistent.
     """
 
-    def __init__(self, marginales: dict, graine: int = 42):
-        self.marginales = marginales
-        self.rng = np.random.default_rng(graine)
+    def __init__(self, marginals: dict, seed: int = 42):
+        self.marginals = marginals
+        self.rng = np.random.default_rng(seed)
 
-    def _numerique(self, spec: dict, n: int) -> np.ndarray:
+    def _numeric(self, spec: dict, n: int) -> np.ndarray:
         if spec["type"] == "discrete":
-            f = np.asarray(spec["frequences"], dtype=float)
-            valeurs = self.rng.choice(spec["valeurs"], size=n, p=f / f.sum())
-        else:   # tirage uniforme à l'intérieur d'un décile tiré au hasard
+            f = np.asarray(spec["frequencies"], dtype=float)
+            values = self.rng.choice(spec["values"], size=n, p=f / f.sum())
+        else:   # uniform draw inside a randomly chosen decile
             d = np.asarray(spec["deciles"], dtype=float)
             k = self.rng.integers(0, len(d) - 1, size=n)
-            valeurs = d[k] + self.rng.random(n) * (d[k + 1] - d[k])
-        valeurs = np.asarray(valeurs, dtype=float)
-        valeurs[self.rng.random(n) < spec["part_manquante"]] = np.nan
-        return valeurs
+            values = d[k] + self.rng.random(n) * (d[k + 1] - d[k])
+        values = np.asarray(values, dtype=float)
+        values[self.rng.random(n) < spec["missing_share"]] = np.nan
+        return values
 
-    def generer(self, n: int = 200) -> pd.DataFrame:
-        profils = {}
-        for nom, spec in self.marginales["numeriques"].items():
-            profils[nom] = self._numerique(spec, n)
-        for nom, frequences in self.marginales["categorielles"].items():
-            f = np.asarray(list(frequences.values()), dtype=float)
-            profils[nom] = self.rng.choice(list(frequences.keys()), size=n, p=f / f.sum())
-        table = pd.DataFrame(profils)
-        # Cohérence métier : la prochaine revue se déduit de la dernière et du cycle du score KYC.
-        table["MOIS_AVANT_PROCHAINE_REVUE"] = [
-            preprocessing.mois_avant_prochaine_revue(k, m)
-            for k, m in zip(table["SCORE_KYC"], table["MOIS_DEPUIS_REVUE"])]
-        for col in ("AGE", "NB_COMPTES", "DOSSIER_COMPLET"):
+    def generate(self, n: int = 200) -> pd.DataFrame:
+        profiles = {}
+        for name, spec in self.marginals["numeric"].items():
+            profiles[name] = self._numeric(spec, n)
+        for name, freqs in self.marginals["categorical"].items():
+            f = np.asarray(list(freqs.values()), dtype=float)
+            profiles[name] = self.rng.choice(list(freqs.keys()), size=n, p=f / f.sum())
+        table = pd.DataFrame(profiles)
+        table["MONTHS_TO_NEXT_REVIEW"] = [
+            preprocessing.months_to_next_review(k, m)
+            for k, m in zip(table["KYC_SCORE"], table["MONTHS_SINCE_REVIEW"])]
+        for col in ("AGE", "N_ACCOUNTS", "FILE_COMPLETE"):
             table[col] = table[col].round()
-        table.index = [f"Profil fictif {i + 1:03d}" for i in range(n)]
+        table.index = [f"Fictitious profile {i + 1:03d}" for i in range(n)]
         return table

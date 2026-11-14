@@ -1,5 +1,5 @@
-# Intégration continue — VIGIE · Groupe BI 5
-# À chaque envoi de code : les tests de l'application et les garde-fous de confidentialité.
+# Continuous integration — VIGIE · Group BI 5
+# On every push: the application tests and the confidentiality safeguards.
 name: Tests
 
 on:
@@ -18,8 +18,8 @@ jobs:
           cache: pip
           cache-dependency-path: 05_web_app/requirements.txt
 
-      - name: Installer les dépendances de l'application
+      - name: Install the application dependencies
         run: pip install -r 05_web_app/requirements.txt pytest
 
-      - name: Tests (encodage, modèle, application, confidentialité)
+      - name: Tests (encoding, model, application, confidentiality)
         run: pytest 05_web_app/tests -v

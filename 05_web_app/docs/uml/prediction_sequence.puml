@@ -1,0 +1,41 @@
+@startuml prediction_sequence
+!include _style.iuml
+title Sequence diagram — prediction request for a fictitious profile
+
+actor "Advisor" as U
+participant "Page\nChurn prediction" as P
+participant "preprocessing\n(encoder)" as E
+participant "ChurnModel" as M
+participant "XGBoost\nBooster" as X
+participant "ArtifactStore" as D
+
+== On first display of the page (cached) ==
+P -> M : ChurnModel()
+M -> D : model_meta()
+D --> M : threshold, columns, score → observed rate table
+M -> X : load_model(churn_model.json)
+M -> E : model_columns()
+E --> M : 31 expected columns
+M --> P : model ready
+
+== Main scenario ==
+U -> P : enters the profile and clicks\n"Compute the score"
+P -> E : months_to_next_review(KYC score, months since review)
+E --> P : next review derived from the KYC cycle
+P -> M : predict(profile)
+M -> E : encode(profile)
+E --> M : vector of 31 features
+M -> X : predict(vector)
+X --> M : probability of leaving
+M -> X : predict(vector, pred_contribs = true)
+X --> M : contribution of each feature (SHAP)
+M -> M : risk_level(score)\nobserved_rate(score)
+M --> P : Prediction(score, level, drivers)
+P --> U : gauge, risk level,\ndrivers, suggested action
+
+alt feature missing from the profile
+  E --> M : ValueError
+  M --> P : error
+  P --> U : error message
+end
+@enduml
