@@ -1,15 +1,15 @@
-# Captures du rapport Power BI
+# Power BI report screenshots
 
-Déposez ici les captures des pages du rapport, **sans aucune ligne client** :
+Drop the screenshots of the report pages here, **with no customer row**:
 
-| Fichier attendu | Page |
+| Expected file | Page |
 |---|---|
-| `page1_overview.png` | Vue d'ensemble |
-| `page2_churn.png` | Analyse du churn |
-| `page3_segments.png` | Segmentation client |
+| `page1_overview.png` | Overview |
+| `page2_churn.png` | Churn analysis |
+| `page3_segments.png` | Customer segmentation |
 
-Avant de capturer : vérifier qu'aucun visuel n'affiche `code_client` ou `code_compte`, et qu'aucune table ne détaille
-des lignes individuelles. Le fichier `.pbix` n'est **jamais** commité : il est remis aux tuteurs hors GitHub.
+Before taking them, check that no visual shows `customer_code` or `account_code`, and that no table lists
+individual rows. The `.pbix` file is **never** committed: it is handed to the supervisors outside GitHub.
 
-En attendant, [`../maquettes/`](../maquettes/) montre les trois pages cibles, produites par l'interface JavaScript
-à partir des mêmes agrégats : elles servent de modèle de mise en page et de référence pour les chiffres.
+Meanwhile, [`../mockups/`](../mockups/) shows the three target pages, produced by the JavaScript interface from the
+same aggregates: they serve as a layout model and as a reference for the figures.

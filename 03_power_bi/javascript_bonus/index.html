@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VIGIE — churn dashboard (JavaScript interface)</title>
+<!--
+  VIGIE · Group BI 5 — Phase 3 bonus: reporting in a JavaScript interface (Chart.js).
+  Mirrors the three pages of the Power BI report: overview, churn analysis, customer segmentation.
+  Fed ONLY by aggregates (data.js): no customer row, no identifier.
+  Opens with a double-click, with no server and no connection.
+-->
+<style>
+  :root { --ink:#14213D; --churn:#D62839; --retention:#2A9D8F; --amber:#F4A261; --sky:#457B9D;
+          --mist:#E9ECEF; --paper:#FAFAF7; --grey:#6B7280; --text:#1F2937; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--text);
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  header { background:var(--ink); color:#fff; padding:18px 28px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  header svg { width:46px; height:46px; flex:none; }
+  header h1 { font-size:1.25rem; margin:0; letter-spacing:-.01em; }
+  header p { margin:2px 0 0; color:#CBD5E1; font-size:.86rem; }
+  nav { margin-left:auto; display:flex; gap:6px; flex-wrap:wrap; }
+  nav button { background:transparent; color:#E5E7EB; border:1px solid rgba(255,255,255,.25); border-radius:999px;
+               padding:8px 16px; font-size:.9rem; cursor:pointer; }
+  nav button[aria-selected="true"] { background:#fff; color:var(--ink); border-color:#fff; font-weight:700; }
+  nav button:focus-visible, select:focus-visible { outline:3px solid var(--amber); outline-offset:2px; }
+  main { max-width:1180px; margin:0 auto; padding:24px 20px 40px; }
+  section[hidden] { display:none; }
+  h2 { color:var(--ink); font-size:1.25rem; margin:0 0 4px; }
+  .lead { color:var(--grey); margin:0 0 18px; font-size:.93rem; }
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:18px; }
+  @media (max-width: 900px) { .cards { grid-template-columns:repeat(2,1fr); } }
+  @media (max-width: 480px) { .cards { grid-template-columns:1fr; } }
+  .card { background:#fff; border:1px solid var(--mist); border-radius:14px; padding:14px 16px; }
+  .card.accent { border-left:5px solid var(--churn); } .card.green { border-left:5px solid var(--retention); }
+  .card .label { color:var(--grey); font-size:.74rem; text-transform:uppercase; letter-spacing:.06em; }
+  .card .value { color:var(--ink); font-size:1.7rem; font-weight:800; line-height:1.25; }
+  .card .detail { color:var(--grey); font-size:.8rem; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr)); gap:16px; }
+  .panel { background:#fff; border:1px solid var(--mist); border-radius:14px; padding:16px; min-width:0; }
+  .panel h3 { margin:0 0 2px; font-size:1rem; color:var(--ink); }
+  .panel p { margin:0 0 10px; color:var(--grey); font-size:.82rem; }
+  .frame { position:relative; height:300px; }
+  .wide { grid-column:1 / -1; }
+  .note { background:#fff; border:1px solid var(--mist); border-left:5px solid var(--sky); border-radius:10px;
+          padding:11px 15px; font-size:.87rem; margin:16px 0; }
+  select { font:inherit; padding:7px 10px; border-radius:8px; border:1px solid #CBD5E1; background:#fff; color:var(--text); }
+  table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th, td { padding:8px 10px; border-bottom:1px solid var(--mist); text-align:right; white-space:nowrap; }
+  th:first-child, td:first-child { text-align:left; }
+  th { color:var(--grey); font-weight:600; font-size:.78rem; text-transform:uppercase; letter-spacing:.04em; }
+  .scroll { overflow-x:auto; }
+  footer { color:var(--grey); font-size:.78rem; border-top:1px solid var(--mist); margin-top:28px; padding-top:12px; }
+</style>
+</head>
+<body>
+<header>
+  <svg viewBox="0 0 120 120" aria-hidden="true"><rect width="120" height="120" rx="26" fill="#0B1529"/>
+    <path d="M24 78 A46 46 0 0 1 96 78" fill="none" stroke="#FAFAF7" stroke-width="5" stroke-linecap="round" opacity=".35"/>
+    <path d="M36 78 A33 33 0 0 1 84 78" fill="none" stroke="#FAFAF7" stroke-width="5" stroke-linecap="round" opacity=".65"/>
+    <path d="M48 78 A19 19 0 0 1 72 78" fill="none" stroke="#FAFAF7" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="60" cy="78" r="8" fill="#D62839"/><rect x="24" y="92" width="72" height="5" rx="2.5" fill="#2A9D8F"/></svg>
+  <div><h1>VIGIE — churn dashboard</h1><p>Group BI 5 · ESPRIT School of Business · Integrated Project 2026</p></div>
+  <nav role="tablist" aria-label="Dashboard pages">
+    <button role="tab" aria-selected="true" data-page="overview">1 · Overview</button>
+    <button role="tab" aria-selected="false" data-page="churn">2 · Churn analysis</button>
+    <button role="tab" aria-selected="false" data-page="segments">3 · Customer segmentation</button>
+  </nav>
+</header>
+
+<main>
+  <section id="overview">
+    <h2>Overview</h2>
+    <p class="lead">Key indicators of the portfolio and how closures evolve.</p>
+    <div class="cards" id="overview-cards"></div>
+    <div class="grid">
+      <div class="panel wide"><h3>Account closures per week</h3>
+        <p>Series corrected for the five mass operations (red dotted lines).</p>
+        <div class="frame"><canvas id="c-series"></canvas></div></div>
+      <div class="panel"><h3>Closures per year</h3><p>Account grain.</p><div class="frame"><canvas id="c-years"></canvas></div></div>
+      <div class="panel"><h3>The churn rate depends on the grain</h3><p>Same file, three readings.</p><div class="frame"><canvas id="c-grain"></canvas></div></div>
+    </div>
+  </section>
+
+  <section id="churn" hidden>
+    <h2>Churn analysis</h2>
+    <p class="lead">Where does churn concentrate? Pick an axis.</p>
+    <p><label for="customer-axis">Customer axis: </label><select id="customer-axis"></select></p>
+    <div class="grid">
+      <div class="panel wide"><h3 id="customer-axis-title"></h3><p>Customer grain · dashed line: average rate · red: above average.</p>
+        <div class="frame"><canvas id="c-customer-axis"></canvas></div></div>
+    </div>
+    <p style="margin-top:18px"><label for="account-axis">Account axis: </label><select id="account-axis"></select></p>
+    <div class="grid">
+      <div class="panel"><h3 id="account-axis-title"></h3><p>Account grain.</p><div class="frame"><canvas id="c-account-axis"></canvas></div></div>
+      <div class="panel"><h3>Declared closure reasons</h3><p>Closed accounts.</p><div class="frame"><canvas id="c-reasons"></canvas></div></div>
+    </div>
+    <div class="note"><b>Reading the account axis.</b> For two closed accounts in three, the family, currency and product are no longer
+      filled in: they form the "Not provided" category, with 100% churn. The rate of the other categories is therefore understated.</div>
+  </section>
+
+  <section id="segments" hidden>
+    <h2>Customer segmentation</h2>
+    <p class="lead">Profile and value of the commercial segments.</p>
+    <div class="grid">
+      <div class="panel"><h3>Product holding and churn by segment</h3><p>Bubble size: number of customers.</p><div class="frame"><canvas id="c-bubbles"></canvas></div></div>
+      <div class="panel"><h3>Customers by segment</h3><p>Customers with at least one account.</p><div class="frame"><canvas id="c-split"></canvas></div></div>
+      <div class="panel wide"><h3>Segment profile</h3><p>Median balance: sum of the balances of a customer's active accounts, median per segment.</p>
+        <div class="scroll"><table id="t-segments"></table></div></div>
+      <div class="panel wide"><h3>Churn rate by branch group</h3><p>AG00 = masked branches.</p><div class="frame"><canvas id="c-branches"></canvas></div></div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+</main>
+
+<script src="chart.umd.js"></script>
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.VIGIE_DATA, K = D.kpi, G = K.overall, F = D.forecast;
+  var C = { ink:"#14213D", churn:"#D62839", retention:"#2A9D8F", amber:"#F4A261", sky:"#457B9D", mist:"#E9ECEF", grey:"#6B7280" };
+  var nb = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
+  var nb1 = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var nb2 = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  function pct(x, d) { d = d === undefined ? 1 : d;
+    return new Intl.NumberFormat("en-GB", { style: "percent", minimumFractionDigits: d, maximumFractionDigits: d }).format(x); }
+  Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+  Chart.defaults.color = C.grey;
+  Chart.defaults.maintainAspectRatio = false;
+  Chart.defaults.plugins.legend.position = "bottom";
+
+  var cards = [
+    ["Churn rate · accounts", pct(G.account_churn_rate), nb.format(G.closed_accounts) + " closed out of " + nb.format(G.accounts), "accent"],
+    ["Churn rate · customers", pct(G.customer_churn_rate), nb.format(G.churned_customers) + " left out of " + nb.format(G.customers_with_account), "accent"],
+    ["Active accounts", nb.format(G.active_accounts), "median balance: " + nb.format(G.median_balance_active_accounts), "green"],
+    ["Average tenure", nb1.format(G.average_customer_tenure) + " years", pct(G.multi_account_share) + " hold several accounts", "green"],
+    ["Customers", nb.format(G.customers), "of which " + nb.format(G.customers - G.customers_with_account) + " with no account", ""],
+    ["Complete files", pct(G.complete_file_share), "customers with at least one account", ""],
+    ["Overdue reviews", pct(G.overdue_review_share), "customers with at least one account", ""],
+    ["Overdrawn accounts", pct(G.overdrawn_share_active), "among active accounts", ""]
+  ];
+  document.getElementById("overview-cards").innerHTML = cards.map(function (c) {
+    return '<div class="card ' + c[3] + '"><div class="label">' + c[0] + '</div><div class="value">' + c[1] +
+           '</div><div class="detail">' + c[2] + "</div></div>";
+  }).join("");
+
+  var H = F.history;
+  new Chart(document.getElementById("c-series"), {
+    type: "line",
+    data: { labels: H.weeks, datasets: [{ label: "Closures per week", data: H.corrected, borderColor: C.ink,
+            backgroundColor: "rgba(20,33,61,.08)", fill: true, pointRadius: 0, borderWidth: 1.4, tension: 0 }] },
+    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return nb.format(c.parsed.y) + " closures"; } } } },
+      scales: { x: { ticks: { maxTicksLimit: 10, callback: function (v) { return this.getLabelForValue(v).slice(0, 7); } }, grid: { display: false } },
+                y: { beginAtZero: true, ticks: { callback: function (v) { return nb.format(v); } } } } },
+    plugins: [{ id: "mass", afterDraw: function (ch) {
+      var ctx = ch.ctx, x = ch.scales.x, y = ch.scales.y;
+      ctx.save(); ctx.setLineDash([4, 4]); ctx.strokeStyle = C.churn; ctx.lineWidth = 1.2;
+      H.mass_weeks.forEach(function (s) { var px = x.getPixelForValue(H.weeks.indexOf(s));
+        ctx.beginPath(); ctx.moveTo(px, y.top); ctx.lineTo(px, y.bottom); ctx.stroke(); });
+      ctx.restore(); } }]
+  });
+  new Chart(document.getElementById("c-years"), {
+    type: "bar",
+    data: { labels: K.closures_per_year.map(function (a) { return a.year; }),
+            datasets: [{ label: "Closed accounts", data: K.closures_per_year.map(function (a) { return a.accounts; }), backgroundColor: C.churn, borderRadius: 4 }] },
+    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return nb.format(c.parsed.y) + " closed accounts"; } } } },
+               scales: { x: { grid: { display: false } }, y: { ticks: { callback: function (v) { return nb.format(v); } } } } }
+  });
+  new Chart(document.getElementById("c-grain"), {
+    type: "bar",
+    data: { labels: ["Per row", "Per account", "Per customer (with account)", "Per customer (all)"],
+            datasets: [{ data: [G.row_churn_rate, G.account_churn_rate, G.customer_churn_rate, G.all_customers_churn_rate],
+                         backgroundColor: [C.mist, C.churn, C.ink, C.sky], borderRadius: 4 }] },
+    options: { indexAxis: "y", plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return pct(c.parsed.x); } } } },
+               scales: { x: { max: 0.5, ticks: { stepSize: 0.1, callback: function (v) { return pct(v, 0); } } }, y: { grid: { display: false } } } }
+  });
+
+  function meanLine(value) {
+    return { id: "mean", afterDraw: function (ch) {
+      var ctx = ch.ctx, y = ch.scales.y.getPixelForValue(value), a = ch.chartArea;
+      ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(a.left, y); ctx.lineTo(a.right, y); ctx.stroke();
+      ctx.fillStyle = C.ink; ctx.font = "12px " + Chart.defaults.font.family; ctx.textAlign = "right";
+      ctx.fillText("average " + pct(value), a.right - 4, a.top + 12); ctx.restore(); } };
+  }
+  function axisChart(canvasId, selectId, titleId, axes, mean, unit) {
+    var select = document.getElementById(selectId), chart = null;
+    Object.keys(axes).forEach(function (name) { var o = document.createElement("option"); o.textContent = name; select.appendChild(o); });
+    function draw() {
+      var rows = axes[select.value];
+      document.getElementById(titleId).textContent = "Churn rate by " + select.value.toLowerCase();
+      if (chart) { chart.destroy(); }
+      chart = new Chart(document.getElementById(canvasId), {
+        type: "bar",
+        data: { labels: rows.map(function (d) { return d.category; }),
+                datasets: [{ data: rows.map(function (d) { return d.churn_rate; }), borderRadius: 4,
+                             backgroundColor: rows.map(function (d) { return d.churn_rate > mean ? C.churn : C.retention; }) }] },
+        options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) {
+                       return pct(c.parsed.y) + " · " + nb.format(rows[c.dataIndex].count) + " " + unit; } } } },
+                   scales: { x: { grid: { display: false }, ticks: { maxRotation: 45, autoSkip: false } },
+                             y: { beginAtZero: true, ticks: { callback: function (v) { return pct(v, 0); } } } } },
+        plugins: [meanLine(mean)]
+      });
+    }
+    select.addEventListener("change", draw); draw();
+  }
+  axisChart("c-customer-axis", "customer-axis", "customer-axis-title", K.customer_axes, G.customer_churn_rate, "customers");
+  axisChart("c-account-axis", "account-axis", "account-axis-title", K.account_axes, G.account_churn_rate, "accounts");
+  new Chart(document.getElementById("c-reasons"), {
+    type: "bar",
+    data: { labels: K.closure_reasons.slice(0, 7).map(function (m) { return m.reason; }),
+            datasets: [{ data: K.closure_reasons.slice(0, 7).map(function (m) { return m.accounts; }), backgroundColor: C.sky, borderRadius: 4 }] },
+    options: { indexAxis: "y", plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return nb.format(c.parsed.x) + " accounts"; } } } },
+               scales: { x: { ticks: { callback: function (v) { return nb.format(v); } } }, y: { grid: { display: false } } } }
+  });
+
+  var S = K.segments, colours = [C.ink, C.sky, C.amber, C.retention];
+  new Chart(document.getElementById("c-bubbles"), {
+    type: "bubble",
+    data: { datasets: S.map(function (s, i) { return { label: s.segment, backgroundColor: colours[i % 4] + "CC", borderColor: "#fff", borderWidth: 2,
+              data: [{ x: s.accounts_per_customer, y: s.churn_rate, r: Math.sqrt(s.customers) / 22 + 6 }] }; }) },
+    options: { plugins: { tooltip: { callbacks: { label: function (c) { var s = S[c.datasetIndex];
+                 return s.segment + ": " + pct(s.churn_rate) + " churn · " + nb2.format(s.accounts_per_customer) + " accounts per customer · " + nb.format(s.customers) + " customers"; } } } },
+               scales: { x: { title: { display: true, text: "Accounts per customer" }, min: 0, max: 7 },
+                         y: { title: { display: true, text: "Churn rate" }, min: 0.28, max: 0.42, ticks: { callback: function (v) { return pct(v, 0); } } } } }
+  });
+  new Chart(document.getElementById("c-split"), {
+    type: "doughnut",
+    data: { labels: S.map(function (s) { return s.segment; }), datasets: [{ data: S.map(function (s) { return s.customers; }), backgroundColor: colours, borderColor: "#fff", borderWidth: 2 }] },
+    options: { cutout: "58%", plugins: { tooltip: { callbacks: { label: function (c) { return c.label + ": " + nb.format(c.parsed) + " customers"; } } } } }
+  });
+  document.getElementById("t-segments").innerHTML =
+    "<thead><tr><th>Segment</th><th>Customers</th><th>Churn rate</th><th>Average tenure</th><th>Accounts per customer</th>" +
+    "<th>Multi-account</th><th>Complete files</th><th>Median balance</th></tr></thead><tbody>" +
+    S.map(function (s) { return "<tr><td>" + s.segment + "</td><td>" + nb.format(s.customers) + "</td><td>" + pct(s.churn_rate) + "</td><td>" +
+      nb1.format(s.average_tenure) + " years</td><td>" + nb2.format(s.accounts_per_customer) + "</td><td>" + pct(s.multi_account_share) + "</td><td>" +
+      pct(s.complete_file_share) + "</td><td>" + nb.format(s.median_balance_active_customers) + "</td></tr>"; }).join("") + "</tbody>";
+  var A = K.customer_axes["Branch group"];
+  new Chart(document.getElementById("c-branches"), {
+    type: "bar",
+    data: { labels: A.map(function (d) { return d.category; }),
+            datasets: [{ data: A.map(function (d) { return d.churn_rate; }), borderRadius: 4,
+                         backgroundColor: A.map(function (d) { return d.category === "AG00" ? C.grey : d.churn_rate > G.customer_churn_rate ? C.churn : C.retention; }) }] },
+    options: { plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return pct(c.parsed.y) + " · " + nb.format(A[c.dataIndex].count) + " customers"; } } } },
+               scales: { x: { grid: { display: false } }, y: { beginAtZero: true, ticks: { callback: function (v) { return pct(v, 0); } } } } },
+    plugins: [meanLine(G.customer_churn_rate)]
+  });
+
+  var tabs = document.querySelectorAll("nav button");
+  tabs.forEach(function (b) { b.addEventListener("click", function () {
+    tabs.forEach(function (o) { o.setAttribute("aria-selected", String(o === b)); });
+    document.querySelectorAll("main > section").forEach(function (s) { s.hidden = s.id !== b.dataset.page; });
+    window.dispatchEvent(new Event("resize"));
+  }); });
+  if (location.hash) { var t = document.querySelector('nav button[data-page="' + location.hash.slice(1) + '"]'); if (t) { t.click(); } }
+
+  document.getElementById("footer").innerHTML = "VIGIE · Group BI 5 — aggregates only, no category with fewer than " +
+    K.source.min_cell_size + " individuals. Dates shifted and amounts rounded by the anonymisation.<br>" +
+    "Fingerprint of the source file (SHA-256): " + K.source.sha256.slice(0, 16) + "… · Charts: Chart.js (MIT licence).";
+})();
+</script>
+</body>
+</html>

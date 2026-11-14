@@ -1,45 +1,45 @@
-# 03 — Reporting Power BI
+# 03 — Power BI reporting
 
-| Livrable | Fichier | Statut |
+| Deliverable | File | Status |
 |---|---|---|
-| Documentation des mesures DAX | [`measures_dax.md`](measures_dax.md) | 30 mesures, chacune avec sa valeur attendue |
-| Guide de construction du rapport | [`guide_construction.md`](guide_construction.md) | connexion, modèle, 3 pages, interactivité |
-| Thème du rapport | [`theme_vigie.json`](theme_vigie.json) | charte VIGIE (couleurs, polices) |
-| Maquettes des trois pages | [`maquettes/`](maquettes/) | produites par l'interface JavaScript |
-| Captures du rapport | [`screenshots/`](screenshots/README.md) | **à déposer** après construction du `.pbix` |
-| *Bonus* — interface JavaScript | [`bonus_javascript/`](bonus_javascript/) | Chart.js, alimentée par des agrégats |
-| Fichier `rapport.pbix` | — | **jamais dans le dépôt** : remis aux tuteurs hors GitHub |
+| DAX measures documentation | [`dax_measures.md`](dax_measures.md) | 30 measures, each with its expected value |
+| Report build guide | [`build_guide.md`](build_guide.md) | connection, model, 3 pages, interactivity |
+| Report theme | [`vigie_theme.json`](vigie_theme.json) | VIGIE identity (colours, fonts) |
+| Mockups of the three pages | [`mockups/`](mockups/) | produced by the JavaScript interface |
+| Report screenshots | [`screenshots/`](screenshots/README.md) | **to add** once the `.pbix` is built |
+| *Bonus* — JavaScript interface | [`javascript_bonus/`](javascript_bonus/) | Chart.js, fed by aggregates |
+| `report.pbix` file | — | **never in the repository**: handed to the supervisors outside GitHub |
 
-## Les trois pages
+## The three pages
 
-| Page | Question | Visuels principaux |
+| Page | Question | Main visuals |
 |---|---|---|
-| **1 · Vue d'ensemble** | Où en est le churn ? | 8 cartes KPI, clôtures par semaine et par année, effet du grain |
-| **2 · Analyse du churn** | Où se concentre-t-il ? | churn par âge, ancienneté, conformité, produit, devise ; motifs ; arbre de décomposition |
-| **3 · Segmentation client** | À quoi ressemblent les segments ? | carte équipement × churn, profil des segments, agences, croisement âge × ancienneté |
+| **1 · Overview** | Where does churn stand? | 8 KPI cards, closures per week and per year, effect of the grain |
+| **2 · Churn analysis** | Where does it concentrate? | churn by age, tenure, compliance, product, currency; reasons; decomposition tree |
+| **3 · Customer segmentation** | What do the segments look like? | product holding × churn map, segment profile, branches, age × tenure cross-analysis |
 
-![Vue d'ensemble](maquettes/page1_vue_ensemble.png)
+![Overview](mockups/page1_overview.png)
 
-## Trois règles qui rendent les mesures justes
+## Three rules that make the measures right
 
-1. **Un taux à son grain.** `Taux Churn Comptes` (36,12 %) et `Taux Churn Clients` (36,78 %) sont deux mesures
-   distinctes ; le taux « par ligne » du fichier source (40,3 %) n'existe plus dans l'entrepôt.
-2. **Deux relations de date inactives.** `dim_date` sert à la fois à l'ouverture et à la clôture ; chaque mesure
-   temporelle choisit son rôle avec `USERELATIONSHIP`. Un filtre de date ne fausse donc pas les KPI globaux.
-3. **« Non renseigné » reste visible.** 68 % des comptes clos n'ont plus de famille, de devise ni de produit :
-   masquer ce membre ferait croire que certaines familles ne « churnent » presque pas.
+1. **A rate at its grain.** `Account Churn Rate` (36.12%) and `Customer Churn Rate` (36.78%) are two distinct
+   measures; the "per row" rate of the source file (40.3%) no longer exists in the warehouse.
+2. **Two inactive date relationships.** `dim_date` serves both opening and closing; each time-based measure picks its
+   role with `USERELATIONSHIP`. A date filter therefore does not distort the overall KPIs.
+3. **"Not provided" stays visible.** 68% of closed accounts no longer have a family, currency or product: hiding this
+   member would suggest that some families hardly churn.
 
-## Vérifier le rapport
+## Checking the report
 
-Chaque mesure de `measures_dax.md` est accompagnée de la valeur calculée en SQL sur l'entrepôt. Le rapport est juste
-quand, sans filtre, il affiche : 410 309 comptes · 148 215 clos · 36,12 % · 363 024 clients · 117 345 partis · 36,78 %.
+Each measure in `dax_measures.md` comes with the value computed in SQL on the warehouse. The report is right when,
+with no filter, it shows: 410,309 accounts · 148,215 closed · 36.12% · 363,024 customers · 117,345 left · 36.78%.
 
-## Bonus — interface JavaScript
+## Bonus — JavaScript interface
 
-[`bonus_javascript/index.html`](bonus_javascript/index.html) reprend les trois pages dans une page web autonome
-(Chart.js). Elle s'ouvre par un double-clic, fonctionne hors connexion et ne contient que des agrégats
-(`donnees.js`, généré par `python outils/exporter_tableau_js.py`). Elle sert aussi de maquette pour le rapport Power BI.
+[`javascript_bonus/index.html`](javascript_bonus/index.html) reproduces the three pages in a standalone web page
+(Chart.js). It opens with a double-click, works offline and only holds aggregates (`data.js`, generated by
+`python tools/export_js_dashboard.py`). It also serves as the mockup of the Power BI report.
 
-| Analyse du churn | Segmentation client |
+| Churn analysis | Customer segmentation |
 |---|---|
-| ![Page 2](maquettes/page2_analyse_churn.png) | ![Page 3](maquettes/page3_segmentation.png) |
+| ![Page 2](mockups/page2_churn_analysis.png) | ![Page 3](mockups/page3_segmentation.png) |
