@@ -1,0 +1,70 @@
+# =========================================================
+# Données — AUCUNE donnée dans ce dépôt (règle du projet)
+# =========================================================
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.db
+*.sqlite
+*.duckdb
+data/*
+!data/README.md
+
+# Modèles sauvegardés (restent hors du dépôt)
+*.pkl
+*.joblib
+*.h5
+*.keras
+*.onnx
+04_machine_learning/models/*
+!04_machine_learning/models/.gitkeep
+
+# Power BI (un .pbix contient des données)
+*.pbix
+
+# Talend : espace de travail local (seuls les jobs exportés sont versionnés)
+01_etl/talend/workspace/
+
+# =========================================================
+# Environnements et caches Python
+# =========================================================
+venv/
+env/
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# =========================================================
+# Secrets
+# =========================================================
+.env
+.env.local
+*.secret
+credentials.json
+.streamlit/secrets.toml
+
+# =========================================================
+# IDE / Système
+# =========================================================
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+.~lock.*
+node_modules/
+
+# =========================================================
+# Logs et sorties temporaires
+# =========================================================
+*.log
+logs/
+mlruns/
+outputs/
+06_rapport/sources/report.html
